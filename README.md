@@ -11,6 +11,7 @@ The following are critical things that need to be implemented
 
 *Validation of URL (Bluetooth and Web) so that MITM is hampered
 *S4 implementation of key storage
+*Change Base64 encoding to URL rfc4648 | http://tools.ietf.org/html/rfc4648
 *Fix TODO's 
 *Cleanup code
 
