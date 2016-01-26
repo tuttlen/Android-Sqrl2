@@ -1,0 +1,41 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.tuttlen.android_sqrl"
+        minSdkVersion 21
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/NOTICE' // will not include NOTICE file
+        exclude 'META-INF/LICENSE' // will not include LICENSE file
+        exclude 'META-INF/*' // will not include LICENSE file
+        exclude 'META-INF/DEPENDENCIES' // will not include LICENSE file
+    }
+}
+
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'net.vrallev.ecc:ecc-25519-android:1.0.1'
+    compile 'com.google.zxing:android-core:3.2.1'
+    compile 'com.google.zxing:android-integration:3.2.1'
+    compile files('C:/Users/tuttlen/Documents/GitHub/Android-Sqrl2/libs/httpclient-4.3.5.jar')
+    compile files('C:/Users/tuttlen/Documents/GitHub/Android-Sqrl2/libs/httpcore-4.3.2.jar')
+    compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
+
+}
