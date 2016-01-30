@@ -1,0 +1,6 @@
+[submodule "libs/scrypt"]
+	path = libs/scrypt
+	url = http://github.com/wg/scrypt
+[submodule "libs/SqrlData"]
+	path = libs/SqrlData
+	url = https://github.com/tuttlen/SqrlData.git
