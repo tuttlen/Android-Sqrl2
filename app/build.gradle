@@ -6,11 +6,13 @@ android {
 
     defaultConfig {
         applicationId "com.tuttlen.android_sqrl"
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+        testApplicationId "com.tuttlen.android_sqrl.test"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
     buildTypes {
         release {
@@ -28,14 +30,13 @@ android {
 
 
 dependencies {
-    testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
-    compile 'net.vrallev.ecc:ecc-25519-android:1.0.1'
+    //compile 'net.vrallev.ecc:ecc-25519-android:1.0.1'
     compile 'com.google.zxing:android-core:3.2.1'
     compile 'com.google.zxing:android-integration:3.2.1'
-    compile files('C:/Users/tuttlen/Documents/GitHub/Android-Sqrl2/libs/httpclient-4.3.5.jar')
-    compile files('C:/Users/tuttlen/Documents/GitHub/Android-Sqrl2/libs/httpcore-4.3.2.jar')
-    compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
-
+    compile files('../libs/httpclient-4.3.5.jar')
+    compile files('../libs/httpcore-4.3.2.jar')
+    compile files('../src/httpcore-4.3.2.jar')
+    androidTestCompile   'junit:junit:4.12'
 }

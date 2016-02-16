@@ -326,7 +326,7 @@ public class MainActivity extends Activity {
             String result ="";
             if(authReq.isBlueTooth) {
                 //String message, String signature, String publicKey)
-                MessageFormat msgFormat = new MessageFormat("{0}:{1}:{2}");
+                MessageFormat msgFormat = new MessageFormat("{0}|{1}|{2}");
                 //TODO assert device address we have selected matches
                 String bAddressAndNonce = authReq.getURL();
                 if(ValidateBluetoothAddress(selectedDevice.getAddress(), bAddressAndNonce)) {

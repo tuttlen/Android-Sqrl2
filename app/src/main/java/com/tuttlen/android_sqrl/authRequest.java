@@ -90,8 +90,8 @@ public class authRequest {
        //TODO
         String bTooth = address.substring(0);
         String[] array = bTooth.split(":");
-
-        return array.length ==8;
+        //little endian format trims leading zeroes thus making this less
+        return array.length >=6;
     }
 
     // remove the sqrl:// part from the URL and set isHTTPS
