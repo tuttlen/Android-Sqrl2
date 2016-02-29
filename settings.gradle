@@ -1,1 +1,3 @@
 include ':app'
+include ':androidEd25519'
+include ':androidEd25519'

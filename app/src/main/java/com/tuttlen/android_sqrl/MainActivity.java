@@ -79,8 +79,8 @@ public class MainActivity extends Activity {
     private Button confbutton = null;
     private Button scanButton = null;
     private Button exportKey =null;
-    private authRequest authReq = null; // Contains all the info for the web page you are trying to authenticate with
-    private identity current_identity = null; // The currently logged in identity
+    private static authRequest authReq = null; // Contains all the info for the web page you are trying to authenticate with
+    private static identity current_identity = null; // The currently logged in identity
 
     private String pubKey = "";
     private String sign = "";
