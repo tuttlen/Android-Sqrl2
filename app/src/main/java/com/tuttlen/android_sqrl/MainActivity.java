@@ -34,7 +34,7 @@ import android.widget.TextView;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.github.dazoe.android.Ed25519;
+//import com.github.dazoe.android.Ed25519;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
