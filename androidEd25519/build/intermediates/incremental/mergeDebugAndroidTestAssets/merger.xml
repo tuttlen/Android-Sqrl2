@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="debug"><source path="C:\Users\in805\OneDrive\Documents\GitHub\Android-Sqrl2\androidEd25519\build\intermediates\bundles\debug\assets"/></dataSet><dataSet config="main"><source path="C:\Users\in805\OneDrive\Documents\GitHub\Android-Sqrl2\androidEd25519\src\androidTest\assets"/></dataSet></merger>
+<merger version="3"><dataSet config="debug"><source path="/home/nathan/Documents/github/Android-Sqrl2/androidEd25519/build/intermediates/bundles/debug/assets"/></dataSet><dataSet config="main"><source path="/home/nathan/Documents/github/Android-Sqrl2/androidEd25519/src/androidTest/assets"/></dataSet></merger>
