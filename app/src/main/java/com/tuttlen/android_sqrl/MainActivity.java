@@ -34,7 +34,7 @@ import android.widget.TextView;
 import android.widget.Button;
 import android.widget.Toast;
 
-//import com.github.dazoe.android.Ed25519;
+import com.github.dazoe.android.Ed25519;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -108,6 +108,7 @@ public class MainActivity extends Activity {
         if(authReq == null) {
             confbutton.setEnabled(false);
         }
+
         scanButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
@@ -146,7 +147,13 @@ public class MainActivity extends Activity {
                     current_identity.deleteIdentityFile(getApplicationContext());
             }
         });
-        GetPaired();
+        if(bAdapter != null) {
+            GetPaired();
+        } else
+        {
+            //TODO check to see if bluetooth is off and update this text. Otherwise scream at the user
+            Toast.makeText(getApplicationContext(), "Bluetooth is not emabled or is not working, the app will not function peer to peer", Toast.LENGTH_LONG).show(); // show the user
+        }
     }
 
     /*

@@ -42,7 +42,8 @@ public class ExampleTest extends InstrumentationTestCase {
         AuthorizationRequest req = new AuthorizationRequest("sqrl://example.com/sqrl?4095c8adfa51dabe30fe9f9474d3f91def620300e489e6853baa67bed5d5e0d4");
         String testReuslt = req.getDomain();
         assertEquals("example.com",testReuslt);
-        assertEquals("https://example.com/sqrl",req.getReturnURL());
+        //if we understand how to construct a sqrl then we should expect to understand how to handle the protocol
+        assertEquals("sqrl://example.com/sqrl",req.getReturnURL());
     }
 
     public void testAuth3_nonce() throws Exception{
@@ -55,6 +56,7 @@ public class ExampleTest extends InstrumentationTestCase {
     public void testAuth_malformed_url() throws Exception{
 
         AuthorizationRequest req = new AuthorizationRequest("example.com/sqrl?4095c8adfa51dabe30fe9f9474d3f91def620300e489e6853baa67bed5d5e0d4");
+        //For empty protocol lets assume http
         assertEquals(true,req.IsValid());
         assertEquals("example.com",req.getDomain());
         assertEquals("http://example.com/sqrl",req.getReturnURL());
@@ -63,8 +65,8 @@ public class ExampleTest extends InstrumentationTestCase {
     public void testAuth_malformed_url2() throws Exception{
 
         AuthorizationRequest req = new AuthorizationRequest("10.0.0.2/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
-
-        assertEquals(false,req.IsValid());
+        //Changed an empty protocol to default to http this may chagne
+        assertEquals(true,req.IsValid());
         assertEquals("10.0.0.2",req.getDomain());
         assertEquals("http://10.0.0.2/sqrl",req.getReturnURL());
     }
@@ -72,9 +74,9 @@ public class ExampleTest extends InstrumentationTestCase {
     public void testAuth_malformed_url3() throws Exception{
         //this test just changed, I decided to make this format invalid
         AuthorizationRequest req = new AuthorizationRequest("10.0.0.2.5/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
+        assertEquals(req.IsValid(),true);
         assertEquals("10.0.0.2.5",req.getDomain());
         assertEquals("http://10.0.0.2.5/sqrl",req.getReturnURL());
-        assertEquals(req.IsValid(),true);
     }
 
     public void test_http()
@@ -106,6 +108,7 @@ public class ExampleTest extends InstrumentationTestCase {
 
     public void test_btooth_proper() throws Exception
     {
+        //since
         String properBtooth ="B1:B1:0D:B3:10:30:00:00";
         AuthorizationRequest req = new AuthorizationRequest("B1:B1:0D:B3:10:30:00:00/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
         assertTrue("Is proper Bluetooth address",req.isValidBluetooth);
@@ -117,7 +120,7 @@ public class ExampleTest extends InstrumentationTestCase {
         String properBtooth ="B1:B1:0D:B3:10:30:00:00";
         AuthorizationRequest req = new AuthorizationRequest("B1:B1:0D:B3:10:30:00:00/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
         assertTrue("Is proper Bluetooth address",req.isValidBluetooth);
-        assertEquals("B1:B1:0D:B3:10:30:00:00/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a",req.getURL());
+        assertEquals("B1:B1:0D:B3:10:30:00:00",req.getURL());
     }
 
     public void test_btooth_improper_URL() throws Exception
@@ -126,7 +129,6 @@ public class ExampleTest extends InstrumentationTestCase {
         AuthorizationRequest req = new AuthorizationRequest("B1:B1:0D:B3:10:30:00:00:00/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
         assertFalse("Is proper Blue" +
                 "tooth address", req.isValidBluetooth);
-        assertEquals(req.getBluetoothId(),improperBtooth);
     }
 
     public void test_btooth_malformed() throws Exception
@@ -134,7 +136,6 @@ public class ExampleTest extends InstrumentationTestCase {
         String imProperBtooth ="B1:B1:0D:B3:10:30:00:00:00";
         AuthorizationRequest req = new AuthorizationRequest("B1:B1:0D:B3:10:30:00:00:00/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
         assertFalse(req.isValidBluetooth);
-        assertEquals(req.getBluetoothId(),imProperBtooth);
     }
 
     public void test_NewAuthRequest() throws Exception
