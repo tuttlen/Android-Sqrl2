@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
+    useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.tuttlen.android_sqrl"
@@ -44,15 +45,11 @@ dependencies {
     compile 'com.google.zxing:android-core:3.2.1'
     compile 'com.google.zxing:android-integration:3.2.1'
     //from http://stackoverflow.com/questions/27366430/getting-nosuchfielderror-instance-org-apache-http-message-basicheadervalueparser
-    //compile files('../libs/httpclient-4.3.5.jar')
-    //compile files('../libs/httpcore-4.3.2.jar')
-    //compile files('../src/httpcore-4.3.2.jar')
 
-
-    compile('org.apache.httpcomponents:httpmime:4.3.5') {
+    compile('org.apache.httpcomponents:httpmime:4.5.1') {
         exclude module: 'httpclient'
     }
-    compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
+    compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
 
 
     androidTestCompile 'junit:junit:4.12'

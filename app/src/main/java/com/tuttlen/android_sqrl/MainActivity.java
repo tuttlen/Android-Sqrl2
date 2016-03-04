@@ -1,17 +1,12 @@
 package com.tuttlen.android_sqrl;
 
-import org.apache.http.HttpClientConnection;
-import org.apache.http.HttpConnectionMetrics;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -23,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -42,15 +38,16 @@ import com.google.zxing.integration.android.IntentResult;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBaseHC4;
+import org.apache.http.client.methods.HttpPostHC4;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -407,25 +404,20 @@ public class MainActivity extends Activity {
 
 
         HttpClientBuilder builder;
-        HttpClient httpClient;
-        HttpPost httppost;
+        HttpPostHC4 httppost;
+        CloseableHttpClient httpClient;
 
         try
         {
             builder = HttpClientBuilder.create();
             //builder.setSSLSocketFactory( new SSLConnectionSocketFactory( SSLContext.getDefault()));
             httpClient = builder.build();
-            httppost = new HttpPost(URL);
-            // Add data to post
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("message", message));
-            nameValuePairs.add(new BasicNameValuePair("signature", signature));
-            nameValuePairs.add(new BasicNameValuePair("publicKey", publicKey));
+            httppost = new HttpPostHC4(URL);
 
-            //TODO
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-            HttpResponse response = httpClient.execute(httppost); // Execute HTTP Post Request
+            httppost.addHeader("message",message);
+            httppost.addHeader("signature",signature);
+            httppost.addHeader("publicKey",publicKey);
+            CloseableHttpResponse response = httpClient.execute(httppost); // Execute HTTP Post Request
 
             int status = response.getStatusLine().getStatusCode();
 
