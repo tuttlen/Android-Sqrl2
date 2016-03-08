@@ -23,8 +23,8 @@
         android:id="@+id/confbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editText2"
-        android:layout_below="@+id/editText2"
+        android:layout_alignLeft="@+id/signatureText"
+        android:layout_below="@+id/signatureText"
         android:layout_marginLeft="44dp"
         android:layout_marginTop="14dp"
         android:text="Confirm" />
@@ -34,13 +34,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/confbutton"
-        android:layout_below="@+id/editText2"
+        android:layout_below="@+id/signatureText"
         android:layout_marginLeft="100dp"
         android:layout_marginTop="14dp"
         android:text="Scan" />
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/publicKeyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView1"
@@ -51,7 +51,7 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignLeft="@+id/publicKeyText"
         android:layout_below="@+id/confbutton"
         android:layout_marginTop="16dp"
         android:text="Public key:"
@@ -61,14 +61,14 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editText1"
-        android:layout_below="@+id/editText1"
+        android:layout_alignLeft="@+id/publicKeyText"
+        android:layout_below="@+id/publicKeyText"
         android:layout_marginTop="34dp"
         android:text="Signature:"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/signatureText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView3"

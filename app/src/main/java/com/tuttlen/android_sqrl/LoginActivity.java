@@ -22,6 +22,7 @@ import java.util.List;
 public class LoginActivity extends Activity {
     private String TAG = "loginAct";
     private List<String> users = new ArrayList<String>(); // List of usernames
+    private ArrayList<IdentityData> userIdentities=  new ArrayList<IdentityData>();
     private Spinner username;
 
 
@@ -31,7 +32,7 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.activity_login);
 
         username = (Spinner) findViewById(R.id.userSpinner);
-        final EditText passEdit = (EditText) findViewById(R.id.editText1);
+        final EditText passEdit = (EditText) findViewById(R.id.publicKeyText);
 
         // Add listener on loginbutton
         final Button loginButton = (Button) findViewById(R.id.button1);
@@ -40,7 +41,9 @@ public class LoginActivity extends Activity {
                 String user = users.get(username.getSelectedItemPosition());
                 String pass = passEdit.getText().toString();
 
-                identity id = loadIdentity(user, pass);
+                //identity id = loadIdentity(user, pass);
+                //this will be part of the password verification process which calls Scrypt
+                IdentityData id = IdentityData.selectIdentity(userIdentities,user);
 
                 if (id == null) {
                     Toast.makeText(getApplicationContext(), "Wrong password", Toast.LENGTH_LONG).show();
@@ -49,7 +52,7 @@ public class LoginActivity extends Activity {
                 {
                     // Send object back to parent
                     Intent output = new Intent();
-                    output.putExtra("id",id);
+                    output.putExtra("sqrlid",id);
                     setResult(Activity.RESULT_OK, output);
                     finish();
                 }
@@ -66,14 +69,23 @@ public class LoginActivity extends Activity {
 
 
         // Check if an identity is created
-        identity id = new identity();
+        //identity id = new identity();
+        userIdentities = IdentityData.load(getApplicationContext());
+        if(userIdentities == null)
+        {
+            // If not open newidActivity
+            Intent a = new Intent(LoginActivity.this, newuserActivity.class);
+            startActivity(a);
+        }
+        /*
+        //TODO this will be a screen that calls an API to get SQRL data
         if (!id.isIdentityCreated(this.getApplicationContext())) {
             // If not open newidActivity
             Intent a = new Intent(LoginActivity.this, newuserActivity.class);
             startActivity(a);
         }
-
-        addUsersToSpinner();
+        */
+        addUsersToSpinner(userIdentities);
     }
 
     private identity loadIdentity(String user, String passwd) {
@@ -96,6 +108,18 @@ public class LoginActivity extends Activity {
     public void addUsersToSpinner() {
         users.add("User 1");
         users.add("User 2");
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, users);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        username.setAdapter(dataAdapter);
+    }
+    // adds items to username list (spinner)
+    public void addUsersToSpinner(ArrayList<IdentityData> id) {
+        for(IdentityData item : id) {
+            users.add(item.name);
+        }
+
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, users);

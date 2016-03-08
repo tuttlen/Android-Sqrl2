@@ -1,24 +1,16 @@
 package com.tuttlen.android_sqrl;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,18 +27,12 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBaseHC4;
 import org.apache.http.client.methods.HttpPostHC4;
-import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
 
 
 import java.io.ByteArrayOutputStream;
@@ -55,29 +41,27 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.SSLContext;
 
 public class MainActivity extends Activity {
     private ListView listOfBT;
     BluetoothAdapter bAdapter;
     private TextView textView1 = null;
-    private EditText editText1 = null;
-    private EditText editText2 = null;
+    private EditText publicKeyText = null;
+    private EditText signatureText = null;
     private Button confbutton = null;
     private Button scanButton = null;
     private Button exportKey =null;
     private static authRequest authReq = null; // Contains all the info for the web page you are trying to authenticate with
     private static identity current_identity = null; // The currently logged in identity
+    private static IdentityData current_sqrl_identity = null; // The currently logged in identity
 
     private String pubKey = "";
     private String sign = "";
@@ -94,8 +78,8 @@ public class MainActivity extends Activity {
         //setSupportActionBar(toolbar);
         listOfBT = (ListView) findViewById(R.id.listView);
         textView1 = (TextView) findViewById(R.id.textView1);
-        editText1 = (EditText) findViewById(R.id.editText1);
-        editText2 = (EditText) findViewById(R.id.editText2);
+        publicKeyText = (EditText) findViewById(R.id.publicKeyText);
+        signatureText = (EditText) findViewById(R.id.signatureText);
         //exportPublicKeys
         exportKey = (Button) findViewById(R.id.exportPublicKeys);
         confbutton = (Button) findViewById(R.id.confbutton);
@@ -117,7 +101,7 @@ public class MainActivity extends Activity {
 
         confbutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                editText1.setText("Please wait this will take time");
+                publicKeyText.setText("Please wait this will take time");
                 confbutton.setEnabled(false);
 
                 if(!authReq.isBlueTooth) {
@@ -209,7 +193,7 @@ public class MainActivity extends Activity {
 
     private void ExportKeyViaBtooth(String pubKey) {
 
-        RunFindService_client(pubKey,false);
+        RunFindService_client(pubKey, false);
     }
 
     private void GetPaired()
@@ -273,8 +257,8 @@ public class MainActivity extends Activity {
         super.onPause();
         // Reset for new scan
         textView1.setText("");
-        editText1.setText("");
-        editText2.setText("");
+        publicKeyText.setText("");
+        signatureText.setText("");
         confbutton.setEnabled(true);
         authReq = null;
     }
@@ -283,8 +267,14 @@ public class MainActivity extends Activity {
     {
         // From loginAct
         if (resultCode == RESULT_OK && requestCode == 54321) {
-
-            current_identity = (identity)data.getSerializableExtra("id");
+            //sqrlid
+            if(data.getSerializableExtra("id") !=null)
+            {
+                current_identity = (identity) data.getSerializableExtra("id");
+            } else if(data.getSerializableExtra("sqrlid") !=null)
+            {
+                current_sqrl_identity = (IdentityData) data.getSerializableExtra("sqrlid");
+            }
         }
 
         // Jumps here when QR is scanned
@@ -327,30 +317,37 @@ public class MainActivity extends Activity {
 
             String publicKey_s = Base64.encodeToString(publicKey, Base64.DEFAULT);
             String sign_s = Base64.encodeToString(signature, Base64.DEFAULT);
-            String result ="";
+            //It's either verified or not
+            boolean result = false;
             if(authReq.isBlueTooth) {
                 //String message, String signature, String publicKey)
                 MessageFormat msgFormat = new MessageFormat("{0}|{1}|{2}");
                 //TODO assert device address we have selected matches
                 String bAddressAndNonce = authReq.getURL();
                 if(ValidateBluetoothAddress(selectedDevice.getAddress(), bAddressAndNonce)) {
-                    result = RunFindService_client(msgFormat.format(new Object[]{bAddressAndNonce, sign_s, publicKey_s}), true);
-                    result = result.split(":")[0]; //TODO thrownaway the result for now but we may use later
+                    //TODO need to refactor this to return boolean of validation also this function should return an object
+                    String results = RunFindService_client(msgFormat.format(new Object[]{bAddressAndNonce, sign_s, publicKey_s}), true);
+                    results = results.split(":")[0]; //TODO thrownaway the result for now but we may use later
+                    if(results == "y") {
+                        result = true;
+                    } else {
+                        result = false;
+                    }
                 } else {
                     //for bluetooth this is somewhat important if we want to send or receive passwords
                     Toast.makeText(getApplicationContext(), "Receiver does not match! Please select the right recipient.",
                             Toast.LENGTH_LONG).show(); // show the user
-                    result = "n";
+                    result = false;
                 }
 
             } else {
-                if (web_post(authReq.getReturnURL(), authReq.getURL(), sign_s, publicKey_s)) {
-                    // post the result
-                    result = "y";
-                }
+                result =web_post(authReq.getReturnURL(), authReq.getURL(), sign_s, publicKey_s);
             }
-
-            return new String[] {publicKey_s, sign_s, result};
+            if(result) {
+                return new String[]{publicKey_s, sign_s, "Verified"};
+            } else {
+                return new String[]{publicKey_s, sign_s, "Failed"};
+            }
         }
 
         private boolean ValidateBluetoothAddress(String address, String bAddressAndNonce) {
@@ -366,15 +363,15 @@ public class MainActivity extends Activity {
             sign = result[1];
 
             Context context = getApplicationContext();
-            if (result[2].compareTo("y") == 0)
+            if (result[2].compareTo("Verified") == 0)
             {
                 Toast.makeText(context, "Verified", Toast.LENGTH_LONG).show(); // show the user
             } else {
-                Toast.makeText(context, "Faield to verify", Toast.LENGTH_LONG).show(); // show the user
+                Toast.makeText(context, "Failed to verify", Toast.LENGTH_LONG).show(); // show the user
             }
-
-            editText1.setText(pubKey);
-            editText2.setText(sign);
+            //TODO this is good for debugging but the user does not need to see this
+            publicKeyText.setText(pubKey);
+            signatureText.setText(sign);
         }
     }
 
@@ -428,16 +425,19 @@ public class MainActivity extends Activity {
                 String out = ostream.toString();
                 Log.v("web", out);
                 // See if the page returned "Verified"
-                if (out.contains("Verified")) {
-                    return true; // return true if verified
-                }
+                //if (out.contains("Verified")) {
+                //    return true; // return true if verified
+               // }
+                //according to spec if we have a status of OK that means it worked any other and it fails,
+                //TODO I am not sure if other 200 class codes are also acceptable
+                return true;
             }  else {Log.v("web", "Connection not ok");}
         } catch (ClientProtocolException e) {
             Log.e("web", "error");
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             Log.e("web", "error");
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         return false; // Return false if query did not return verification

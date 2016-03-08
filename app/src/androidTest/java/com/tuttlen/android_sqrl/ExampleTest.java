@@ -2,6 +2,8 @@ package com.tuttlen.android_sqrl;
 
 import android.test.InstrumentationTestCase;
 
+import com.github.dazoe.android.Ed25519;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -13,6 +15,28 @@ import javax.net.ssl.SSLContext;
  * Created by tuttlen on 1/23/2016.
  */
 public class ExampleTest extends InstrumentationTestCase {
+
+    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for ( int j = 0; j < bytes.length; j++ ) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
+    //TODO move this to a helper class
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i+1), 16));
+        }
+        return data;
+    }
 
     public void testAuth() throws Exception{
 
@@ -166,4 +190,19 @@ public class ExampleTest extends InstrumentationTestCase {
         AuthorizationRequest req6 = new AuthorizationRequest(s6);
 
     }
+
+    public void test_ed25519() throws Exception
+    {
+        //private
+        //8385e4536a0c29d1c2c6d8befe741feb28d01a5722596362bb4487a7fd2f03120b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c
+
+        //public
+        //0b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c
+        byte[] publicKey_check = hexStringToByteArray("0b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c");
+        byte[] privateKey = hexStringToByteArray("8385e4536a0c29d1c2c6d8befe741feb28d01a5722596362bb4487a7fd2f03120b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c");
+        byte[] publicKey = Ed25519.PublicKeyFromPrivateKey(privateKey);
+
+        assertEquals(bytesToHex(publicKey_check), bytesToHex(publicKey));
+    }
+
 }

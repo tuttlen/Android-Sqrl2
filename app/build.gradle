@@ -12,6 +12,11 @@ android {
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+
+        ndk {
+            moduleName "androidEd25519"
+        }
+
         testApplicationId "com.tuttlen.android_sqrl.androidTest"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
 
@@ -29,6 +34,11 @@ android {
         }
     }
 
+    sourceSets {
+        main.jni.srcDirs = []
+        main.jniLibs.srcDirs = ['libs']
+    }
+
     packagingOptions {
         exclude 'META-INF/NOTICE' // will not include NOTICE file
         exclude 'META-INF/LICENSE' // will not include LICENSE file
@@ -42,6 +52,15 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     //compile project (':androidEd25519')
     //compile 'net.vrallev.ecc:ecc-25519-android:1.0.1'
+    compile 'com.google.android.gms:play-services-identity:7.8.0'
+    compile('com.google.api-client:google-api-client-android:1.20.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+
+    compile('com.google.apis:google-api-services-drive:v3-rev6-1.20.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+
     compile 'com.google.zxing:android-core:3.2.1'
     compile 'com.google.zxing:android-integration:3.2.1'
     //from http://stackoverflow.com/questions/27366430/getting-nosuchfielderror-instance-org-apache-http-message-basicheadervalueparser
