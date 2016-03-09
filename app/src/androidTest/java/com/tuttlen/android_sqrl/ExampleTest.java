@@ -4,12 +4,19 @@ import android.test.InstrumentationTestCase;
 
 import com.github.dazoe.android.Ed25519;
 
+import org.abstractj.kalium.Sodium;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.net.ssl.SSLContext;
+
+import eu.artemisc.stodium.Stodium;
 
 /**
  * Created by tuttlen on 1/23/2016.
@@ -37,12 +44,40 @@ public class ExampleTest extends InstrumentationTestCase {
         }
         return data;
     }
+    public static byte[] massXOR(byte[] first, byte[] second)
+    {
+        byte[] resultByte = new byte[first.length];
+        for (int i = 0; i < first.length; i++)
+        {
+            resultByte[i] = (byte)(first[i] ^ second[i]);
+        }
+        return resultByte;
+    }
+
+    //PBKDF(2)
+    public static byte[] PK(byte[] password, byte[] salt, int iterations, byte[] previosResult, int N, int r) throws GeneralSecurityException
+    {
+        int p=1;
+
+        byte[] result = new byte[32];
+        Sodium.crypto_pwhash_scryptsalsa208sha256_ll(password,password.length,salt,salt.length,N,r,p,result,result.length);
+        iterations--;
+        android.util.Log.d("PK",String.format("On iteration %d: %s",iterations,bytesToHex(result)));
+        if(iterations == 0 && previosResult.length == 0) return result;
+        if(iterations == 0) return massXOR(result,previosResult);
+        if(previosResult.length == 0)
+        {
+            return PK(password,result,iterations,result,N,r);
+        } else {
+            return PK(password,result,iterations,massXOR(previosResult,result),N,r);
+        }
+    }
 
     public void testAuth() throws Exception{
 
         AuthorizationRequest req = new AuthorizationRequest("https://localhost/sqrl?4095c8adfa51dabe30fe9f9474d3f91def620300e489e6853baa67bed5d5e0d4");
         String testReuslt = req.getDomain();
-        assertEquals("localhost",testReuslt);
+        assertEquals("localhost", testReuslt);
         assertEquals( "https://localhost/sqrl",req.getReturnURL());
     }
     public void testAuth2() throws Exception{
@@ -203,6 +238,42 @@ public class ExampleTest extends InstrumentationTestCase {
         byte[] publicKey = Ed25519.PublicKeyFromPrivateKey(privateKey);
 
         assertEquals(bytesToHex(publicKey_check), bytesToHex(publicKey));
+    }
+
+
+    public void testSalsa()  throws GeneralSecurityException
+    {
+        //Sodium.sodium_init();
+        Stodium.StodiumInit();
+        String saltStr = "0000000000000000000000000000000000000000000000000000000000000000";
+        String expectedReuslt = "2f30b9d4e5c48056177ff90a6cc9da04b648a7e8451dfa60da56c148187f6a7d";
+        String expectedResult1 ="532bcc911c16df81996258158de460b2e59d9a86531d59661da5fbeb69f7cd54";
+        String passwd = "password";
+        byte[] random = new byte[]{};
+        byte[] outBytes = new byte[]{};
+        byte[] password = passwd.getBytes();
+        byte[] salt = hexStringToByteArray(saltStr);
+        int N = 512;
+        int r = 256;
+        int p = 1;
+        int iterations = 123;
+
+        //Sodium.randombytes_buf(random, 32);
+        //Sodium.crypto_pwhash_scryptsalsa208sha256_ll(password,password.length,salt,salt.length,N,r,p,outBytes,outBytes.length);
+        android.util.Log.d("PK",String.format("Pasword: %s",bytesToHex(password)));
+        android.util.Log.d("PK",String.format("salt: %s",bytesToHex(salt)));
+        String result2 = bytesToHex(PK(password,salt,iterations,new byte[]{},N,r));
+
+        assertEquals(expectedReuslt.toUpperCase(), result2);
+    }
+
+    public void testByteUnPackSQRLData()
+    {
+        Map<String,BytePacked> packedResource = new HashMap<String,BytePacked>();
+        String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
+        String sqrlBase = sqrlData.substring(8);
+
+
     }
 
 }

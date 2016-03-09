@@ -16,6 +16,9 @@ android {
         ndk {
             moduleName "androidEd25519"
         }
+        ndk {
+            moduleName "libstodium"
+        }
 
         testApplicationId "com.tuttlen.android_sqrl.androidTest"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
@@ -73,4 +76,5 @@ dependencies {
 
     androidTestCompile 'junit:junit:4.12'
     compile project(':androidEd25519')
+    compile project(':libstodium')
 }
