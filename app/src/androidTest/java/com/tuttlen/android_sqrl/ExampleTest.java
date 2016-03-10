@@ -1,8 +1,14 @@
 package com.tuttlen.android_sqrl;
 
+import android.support.annotation.NonNull;
 import android.test.InstrumentationTestCase;
 
 import com.github.dazoe.android.Ed25519;
+import com.igormaznitsa.jbbp.JBBPParser;
+import com.igormaznitsa.jbbp.mapper.Bin;
+import com.igormaznitsa.jbbp.mapper.BinType;
+import com.igormaznitsa.jbbp.model.JBBPFieldArrayByte;
+import com.igormaznitsa.jbbp.model.JBBPFieldStruct;
 
 import org.abstractj.kalium.Sodium;
 import org.apache.http.client.HttpClient;
@@ -10,6 +16,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,56 +36,6 @@ import eu.artemisc.stodium.Stodium;
  * Created by tuttlen on 1/23/2016.
  */
 public class ExampleTest extends InstrumentationTestCase {
-
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
-
-    //TODO move this to a helper class
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
-    }
-    public static byte[] massXOR(byte[] first, byte[] second)
-    {
-        byte[] resultByte = new byte[first.length];
-        for (int i = 0; i < first.length; i++)
-        {
-            resultByte[i] = (byte)(first[i] ^ second[i]);
-        }
-        return resultByte;
-    }
-
-    //PBKDF(2)
-    public static byte[] PK(byte[] password, byte[] salt, int iterations, byte[] previosResult, int N, int r) throws GeneralSecurityException
-    {
-        int p=1;
-
-        byte[] result = new byte[32];
-        Sodium.crypto_pwhash_scryptsalsa208sha256_ll(password,password.length,salt,salt.length,N,r,p,result,result.length);
-        iterations--;
-        android.util.Log.d("PK",String.format("On iteration %d: %s",iterations,bytesToHex(result)));
-        if(iterations == 0 && previosResult.length == 0) return result;
-        if(iterations == 0) return massXOR(result,previosResult);
-        if(previosResult.length == 0)
-        {
-            return PK(password,result,iterations,result,N,r);
-        } else {
-            return PK(password,result,iterations,massXOR(previosResult,result),N,r);
-        }
-    }
 
     public void testAuth() throws Exception{
 
@@ -233,11 +197,11 @@ public class ExampleTest extends InstrumentationTestCase {
 
         //public
         //0b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c
-        byte[] publicKey_check = hexStringToByteArray("0b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c");
-        byte[] privateKey = hexStringToByteArray("8385e4536a0c29d1c2c6d8befe741feb28d01a5722596362bb4487a7fd2f03120b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c");
+        byte[] publicKey_check = Helper.hexStringToByteArray("0b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c");
+        byte[] privateKey = Helper.hexStringToByteArray("8385e4536a0c29d1c2c6d8befe741feb28d01a5722596362bb4487a7fd2f03120b387c5669ca6fa137a2a383521f15b6243979f741b828fc0851e98fcfeb026c");
         byte[] publicKey = Ed25519.PublicKeyFromPrivateKey(privateKey);
 
-        assertEquals(bytesToHex(publicKey_check), bytesToHex(publicKey));
+        assertEquals(Helper.bytesToHex(publicKey_check), Helper.bytesToHex(publicKey));
     }
 
 
@@ -245,34 +209,94 @@ public class ExampleTest extends InstrumentationTestCase {
     {
         //Sodium.sodium_init();
         Stodium.StodiumInit();
-        String saltStr = "0000000000000000000000000000000000000000000000000000000000000000";
-        String expectedReuslt = "2f30b9d4e5c48056177ff90a6cc9da04b648a7e8451dfa60da56c148187f6a7d";
-        String expectedResult1 ="532bcc911c16df81996258158de460b2e59d9a86531d59661da5fbeb69f7cd54";
-        String passwd = "password";
+        String saltStr = "62007dc8478a69339b611b7046d6887a";
+
+        String expectedReuslt = "8f84fcff93cd5ef493744ce91a5fc5ee732dbde81d80b56b96cc1d124a906e2b";
+        String passwd = "tttttttttttttttttttttttt";
         byte[] random = new byte[]{};
         byte[] outBytes = new byte[]{};
         byte[] password = passwd.getBytes();
-        byte[] salt = hexStringToByteArray(saltStr);
+        byte[] salt = Helper.hexStringToByteArray(saltStr);
         int N = 512;
         int r = 256;
         int p = 1;
-        int iterations = 123;
+        int iterations = 85;
+
+        String result2 = Helper.bytesToHex(Helper.PK(password, Helper.hexStringToByteArray(saltStr), iterations, new byte[]{}, N, r));
+
+
+        assertEquals(expectedReuslt, result2);
+    }
+
+    public void testSalsa2()  throws GeneralSecurityException
+    {
+        //Sodium.sodium_init();
+        Stodium.StodiumInit();
+        String saltStr = "62007dc8478a69339b611b7046d6887a";
+
+        String expectedReuslt = "2f30b9d4e5c48056177ff90a6cc9da04b648a7e8451dfa60da56c148187f6a7d";
+        String expectedResult1 ="532bcc911c16df81996258158de460b2e59d9a86531d59661da5fbeb69f7cd54";
+        String passwd = "tttttttttttttttttttttttt";
+        byte[] random = new byte[]{};
+        byte[] outBytes = new byte[]{};
+        byte[] password = passwd.getBytes();
+        byte[] salt = Helper.hexStringToByteArray(saltStr);
+        int N = 512;
+        int r = 256;
+        int p = 1;
+        int iterations = 2;
 
         //Sodium.randombytes_buf(random, 32);
         //Sodium.crypto_pwhash_scryptsalsa208sha256_ll(password,password.length,salt,salt.length,N,r,p,outBytes,outBytes.length);
-        android.util.Log.d("PK",String.format("Pasword: %s",bytesToHex(password)));
-        android.util.Log.d("PK",String.format("salt: %s",bytesToHex(salt)));
-        String result2 = bytesToHex(PK(password,salt,iterations,new byte[]{},N,r));
+        android.util.Log.d("PK",String.format("Pasword: %s",Helper.bytesToHex(password)));
+        android.util.Log.d("PK",String.format("salt: %s",Helper.bytesToHex(salt)));
+        for (int i = 0; i < 16; i++) {
+            saltStr = saltStr.substring(2);
+            android.util.Log.d("PKTest",String.format("Salt: %s",saltStr));
+            String result2 = Helper.bytesToHex(Helper.PK(password, Helper.hexStringToByteArray(saltStr), iterations, new byte[]{}, N, r));
+            android.util.Log.d("PKTest",String.format("Pasword: %s",result2));
+        }
 
-        assertEquals(expectedReuslt.toUpperCase(), result2);
+
+        //assertEquals(expectedReuslt, result2);
     }
 
-    public void testByteUnPackSQRLData()
+    public void testByteUnPackSQRLData() throws IOException,GeneralSecurityException
     {
-        Map<String,BytePacked> packedResource = new HashMap<String,BytePacked>();
+        Stodium.StodiumInit();
+        String password= "tttttttttttttttttttttttt";
+
         String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
         String sqrlBase = sqrlData.substring(8);
+        byte[] hexResult = Helper.urlDecode(sqrlBase);
 
+        SqrlData parsed = SqrlData.ExtractSqrlData(hexResult);
+
+        String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
+        String IV = "8c02059cda407590d48eb305";
+        String tag ="4452243e9a02f45c3f75cd7694a0961e";
+        int nfactor  = 512;
+        int iteration = 85;
+        String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
+        String Identity_MasterKey ="64a96b114619d42c480635a946999b098dcfe07f6ff7d8f5e96ad7236eb60c56";
+        String Identity_LockKey ="483f890c1a1a8aecdd3983a810cdc41d8220fbd9caa3e6a1e62a288ff3c4e17f";
+        String scryptSalt ="62007dc8478a69339b611b7046d6887a";
+
+        assertEquals(IV,Helper.bytesToHex(parsed.sqrlStorage.IV));
+        assertEquals(scryptSalt,Helper.bytesToHex(parsed.sqrlStorage.ScryptSalt));
+
+        assertEquals(Identity_LockKey,Helper.bytesToHex(parsed.sqrlStorage.IDLK));
+        assertEquals(Identity_MasterKey,Helper.bytesToHex(parsed.sqrlStorage.IDMK));
+        assertEquals(tag,Helper.bytesToHex(parsed.sqrlStorage.tag));
+        assertEquals(aad,Helper.bytesToHex(parsed.aad));
+        assertEquals(nfactor, 1 << parsed.sqrlStorage.nFactor);
+        assertEquals(iteration,parsed.sqrlStorage.ScryptIteration);
+        assertEquals(Helper.hexStringToByteArray(scryptSalt).length,16);
+        android.util.Log.d("PK", String.format("Password: %s", Helper.bytesToHex(password.getBytes())));
+        android.util.Log.d("PK", String.format("Iterations: %d",parsed.sqrlStorage.ScryptIteration));
+        byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor, 256);
+        android.util.Log.d("PK", String.format("Result: %s",Helper.bytesToHex(scrypekey)));
+        assertEquals(scrpytPassword,Helper.bytesToHex(scrypekey));
 
     }
 
