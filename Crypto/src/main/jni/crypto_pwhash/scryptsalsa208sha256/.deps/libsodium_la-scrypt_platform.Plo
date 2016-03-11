@@ -1,0 +1,148 @@
+crypto_pwhash/scryptsalsa208sha256/libsodium_la-scrypt_platform.lo: \
+ crypto_pwhash/scryptsalsa208sha256/scrypt_platform.c \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/mman.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/cdefs.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/cdefs_elf.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/android/api-level.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stddef.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stdint.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdint.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_wchar_limits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/posix_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/stddef.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/compiler.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include-fixed/asm/posix_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/features.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/posix_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/posix_types_32.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/kernel.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/sysmacros.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/mman.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm-generic/mman.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm-generic/mman-common.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/page.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/page_32.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/errno.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/errno.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/errno.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm-generic/errno.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm-generic/errno-base.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdlib.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/string.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/malloc.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/alloca.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/strings.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/memory.h \
+ crypto_pwhash/scryptsalsa208sha256/crypto_scrypt.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include-fixed/limits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include-fixed/syslimits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/limits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/limits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/limits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/internal_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/limits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/syslimits.h \
+ include/sodium/runtime.h include/sodium/export.h
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/mman.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/cdefs.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/cdefs_elf.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/android/api-level.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stddef.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stdint.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdint.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_wchar_limits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/posix_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/stddef.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/compiler.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include-fixed/asm/posix_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/features.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/posix_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/posix_types_32.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/kernel.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/sysmacros.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/mman.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm-generic/mman.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm-generic/mman-common.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/page.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/page_32.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/errno.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/errno.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/errno.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm-generic/errno.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm-generic/errno-base.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdlib.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/string.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/malloc.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/alloca.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/strings.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/memory.h:
+
+crypto_pwhash/scryptsalsa208sha256/crypto_scrypt.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include-fixed/limits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include-fixed/syslimits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/limits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/limits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/limits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/internal_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/limits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/syslimits.h:
+
+include/sodium/runtime.h:
+
+include/sodium/export.h:

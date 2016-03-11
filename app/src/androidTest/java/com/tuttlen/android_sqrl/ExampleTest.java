@@ -9,12 +9,15 @@ import com.igormaznitsa.jbbp.mapper.Bin;
 import com.igormaznitsa.jbbp.mapper.BinType;
 import com.igormaznitsa.jbbp.model.JBBPFieldArrayByte;
 import com.igormaznitsa.jbbp.model.JBBPFieldStruct;
+import com.tuttlen.aesgcm_android.AESGCMJni4;
 
 import org.abstractj.kalium.Sodium;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -211,7 +214,7 @@ public class ExampleTest extends InstrumentationTestCase {
         Stodium.StodiumInit();
         String saltStr = "62007dc8478a69339b611b7046d6887a";
 
-        String expectedReuslt = "8f84fcff93cd5ef493744ce91a5fc5ee732dbde81d80b56b96cc1d124a906e2b";
+        String expectedReuslt = "5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
         String passwd = "tttttttttttttttttttttttt";
         byte[] random = new byte[]{};
         byte[] outBytes = new byte[]{};
@@ -248,13 +251,13 @@ public class ExampleTest extends InstrumentationTestCase {
 
         //Sodium.randombytes_buf(random, 32);
         //Sodium.crypto_pwhash_scryptsalsa208sha256_ll(password,password.length,salt,salt.length,N,r,p,outBytes,outBytes.length);
-        android.util.Log.d("PK",String.format("Pasword: %s",Helper.bytesToHex(password)));
-        android.util.Log.d("PK",String.format("salt: %s",Helper.bytesToHex(salt)));
+        android.util.Log.d("test",String.format("Pasword: %s",Helper.bytesToHex(password)));
+        android.util.Log.d("test",String.format("salt: %s",Helper.bytesToHex(salt)));
         for (int i = 0; i < 16; i++) {
             saltStr = saltStr.substring(2);
-            android.util.Log.d("PKTest",String.format("Salt: %s",saltStr));
+            android.util.Log.d("test",String.format("Salt: %s",saltStr));
             String result2 = Helper.bytesToHex(Helper.PK(password, Helper.hexStringToByteArray(saltStr), iterations, new byte[]{}, N, r));
-            android.util.Log.d("PKTest",String.format("Pasword: %s",result2));
+            android.util.Log.d("test",String.format("Pasword: %s",result2));
         }
 
 
@@ -292,11 +295,79 @@ public class ExampleTest extends InstrumentationTestCase {
         assertEquals(nfactor, 1 << parsed.sqrlStorage.nFactor);
         assertEquals(iteration,parsed.sqrlStorage.ScryptIteration);
         assertEquals(Helper.hexStringToByteArray(scryptSalt).length,16);
-        android.util.Log.d("PK", String.format("Password: %s", Helper.bytesToHex(password.getBytes())));
-        android.util.Log.d("PK", String.format("Iterations: %d",parsed.sqrlStorage.ScryptIteration));
+        android.util.Log.d("test", String.format("Password: %s", Helper.bytesToHex(password.getBytes())));
+        android.util.Log.d("test", String.format("Iterations: %d",parsed.sqrlStorage.ScryptIteration));
         byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor, 256);
-        android.util.Log.d("PK", String.format("Result: %s",Helper.bytesToHex(scrypekey)));
+        android.util.Log.d("test", String.format("Result: %s",Helper.bytesToHex(scrypekey)));
         assertEquals(scrpytPassword,Helper.bytesToHex(scrypekey));
+
+    }
+
+    public void testByteUnPackSQRLData_Unencrypt() throws IOException,GeneralSecurityException
+    {
+        Stodium.StodiumInit();
+        String password= "tttttttttttttttttttttttt";
+
+        String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
+        String sqrlBase = sqrlData.substring(8);
+        byte[] hexResult = Helper.urlDecode(sqrlBase);
+
+        SqrlData parsed = SqrlData.ExtractSqrlData(hexResult);
+
+        String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
+        String IV = "8c02059cda407590d48eb305";
+        String tag ="4452243e9a02f45c3f75cd7694a0961e";
+        int nfactor  = 512;
+        int iteration = 85;
+        String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
+        String Identity_MasterKey ="64a96b114619d42c480635a946999b098dcfe07f6ff7d8f5e96ad7236eb60c56";
+        String Identity_LockKey ="483f890c1a1a8aecdd3983a810cdc41d8220fbd9caa3e6a1e62a288ff3c4e17f";
+        String scryptSalt ="62007dc8478a69339b611b7046d6887a";
+
+        assertEquals(IV,Helper.bytesToHex(parsed.sqrlStorage.IV));
+        assertEquals(scryptSalt,Helper.bytesToHex(parsed.sqrlStorage.ScryptSalt));
+
+        assertEquals(Identity_LockKey,Helper.bytesToHex(parsed.sqrlStorage.IDLK));
+        assertEquals(Identity_MasterKey,Helper.bytesToHex(parsed.sqrlStorage.IDMK));
+        assertEquals(tag,Helper.bytesToHex(parsed.sqrlStorage.tag));
+        assertEquals(aad, Helper.bytesToHex(parsed.aad));
+        assertEquals(nfactor, 1 << parsed.sqrlStorage.nFactor);
+        assertEquals(iteration, parsed.sqrlStorage.ScryptIteration);
+        assertEquals(Helper.hexStringToByteArray(scryptSalt).length, 16);
+        android.util.Log.d("PK", String.format("Password: %s", Helper.bytesToHex(password.getBytes())));
+        android.util.Log.d("PK", String.format("Iterations: %d", parsed.sqrlStorage.ScryptIteration));
+        byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor, 256);
+        android.util.Log.d("PK", String.format("Result: %s", Helper.bytesToHex(scrypekey)));
+
+        AESGCMJni4 crypto = new AESGCMJni4();
+        String result = crypto.doDecryption(scrypekey, parsed.sqrlStorage.IV, parsed.aad, parsed.sqrlStorage.tag, parsed.sqrlStorage.IDLK);
+        android.util.Log.d("test", String.format("ResultDecryption: %s", result));
+
+        assertEquals(scrpytPassword, Helper.bytesToHex(scrypekey));
+
+    }
+
+    public void testEncryptAADUnencrypt() throws JSONException {
+        Stodium.StodiumInit();
+        AESGCMJni4 crypto = new AESGCMJni4();
+        String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
+        String IV = "8c02059cda407590d48eb305";
+        String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
+        byte[] randomKey = new byte[32];
+        Sodium.randombytes_buf(randomKey, 32);
+        String plainText ="";
+
+        String result = crypto.doEncryption(AESGCMJni4.hexStringToByteArray(scrpytPassword),AESGCMJni4.hexStringToByteArray(IV),AESGCMJni4.hexStringToByteArray(aad),new byte[]{},randomKey);
+        JSONObject object = new JSONObject(result);
+
+        String decryptResult =crypto.doDecryption(AESGCMJni4.hexStringToByteArray(scrpytPassword),
+                                AESGCMJni4.hexStringToByteArray(IV),
+                                AESGCMJni4.hexStringToByteArray(aad),
+                                AESGCMJni4.hexStringToByteArray(object.getString("Tag")),
+                                AESGCMJni4.hexStringToByteArray(object.getString("CipherText")));
+
+        android.util.Log.d("test", String.format("ResultDecryption: %s", decryptResult));
+        assertEquals(AESGCMJni4.bytesToHex(randomKey),decryptResult.toUpperCase());
 
     }
 

@@ -1,0 +1,40 @@
+crypto_scalarmult/curve25519/ref10/libsodium_la-x25519_ref10.lo: \
+ crypto_scalarmult/curve25519/ref10/x25519_ref10.c \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stddef.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stdint.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdint.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_wchar_limits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/android/api-level.h \
+ include/sodium/utils.h include/sodium/export.h \
+ crypto_scalarmult/curve25519/ref10/x25519_ref10.h \
+ include/sodium/crypto_scalarmult_curve25519.h \
+ crypto_scalarmult/curve25519/ref10/../scalarmult_curve25519.h \
+ crypto_scalarmult/curve25519/ref10/../../../crypto_core/curve25519/ref10/curve25519_ref10.h
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stddef.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stdint.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdint.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_wchar_limits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/android/api-level.h:
+
+include/sodium/utils.h:
+
+include/sodium/export.h:
+
+crypto_scalarmult/curve25519/ref10/x25519_ref10.h:
+
+include/sodium/crypto_scalarmult_curve25519.h:
+
+crypto_scalarmult/curve25519/ref10/../scalarmult_curve25519.h:
+
+crypto_scalarmult/curve25519/ref10/../../../crypto_core/curve25519/ref10/curve25519_ref10.h:

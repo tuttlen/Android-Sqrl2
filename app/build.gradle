@@ -20,6 +20,10 @@ android {
             moduleName "libstodium"
         }
 
+        ndk {
+            moduleName "aesgcm4"
+        }
+
         testApplicationId "com.tuttlen.android_sqrl.androidTest"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
 
@@ -53,8 +57,7 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
-    //compile project (':androidEd25519')
-    //compile 'net.vrallev.ecc:ecc-25519-android:1.0.1'
+    compile 'com.igormaznitsa:jbbp:1.2.0'
     compile 'com.google.android.gms:play-services-identity:7.8.0'
     compile('com.google.api-client:google-api-client-android:1.20.0') {
         exclude group: 'org.apache.httpcomponents'
@@ -64,6 +67,7 @@ dependencies {
     }
     compile 'com.google.zxing:android-core:3.2.1'
     compile 'com.google.zxing:android-integration:3.2.1'
+
     //from http://stackoverflow.com/questions/27366430/getting-nosuchfielderror-instance-org-apache-http-message-basicheadervalueparser
     compile('org.apache.httpcomponents:httpmime:4.5.1') {
         exclude module: 'httpclient'
@@ -72,5 +76,5 @@ dependencies {
     androidTestCompile 'junit:junit:4.12'
     compile project(':androidEd25519')
     compile project(':libstodium')
-    compile 'com.igormaznitsa:jbbp:1.2.0'
+    compile project(':Crypto')
 }

@@ -1,0 +1,119 @@
+crypto_aead/aes256gcm/aesni/libaesni_la-aead_aes256gcm_aesni.lo: \
+ crypto_aead/aes256gcm/aesni/aead_aes256gcm_aesni.c \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stdint.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdint.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stddef.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_wchar_limits.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/android/api-level.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdlib.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/cdefs.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/cdefs_elf.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/string.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/malloc.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/alloca.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/strings.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/posix_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/stddef.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/compiler.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include-fixed/asm/posix_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/features.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/posix_types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/posix_types_32.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/types.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/kernel.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/sysmacros.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/memory.h \
+ include/sodium/crypto_aead_aes256gcm.h include/sodium/export.h \
+ include/sodium/export.h include/sodium/runtime.h include/sodium/utils.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/immintrin.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/mmintrin.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/xmmintrin.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/mm_malloc.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/emmintrin.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/pmmintrin.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/tmmintrin.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/wmmintrin.h
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stdint.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdint.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stddef.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/_wchar_limits.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/android/api-level.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/stdlib.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/cdefs.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/cdefs_elf.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/string.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/malloc.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/alloca.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/strings.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/posix_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/stddef.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/compiler.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include-fixed/asm/posix_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/features.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/posix_types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/posix_types_32.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/asm/types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/linux/types.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/machine/kernel.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/sys/sysmacros.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/sysroot/usr/include/memory.h:
+
+include/sodium/crypto_aead_aes256gcm.h:
+
+include/sodium/export.h:
+
+include/sodium/export.h:
+
+include/sodium/runtime.h:
+
+include/sodium/utils.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/immintrin.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/mmintrin.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/xmmintrin.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/mm_malloc.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/emmintrin.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/pmmintrin.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/tmmintrin.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/wmmintrin.h:

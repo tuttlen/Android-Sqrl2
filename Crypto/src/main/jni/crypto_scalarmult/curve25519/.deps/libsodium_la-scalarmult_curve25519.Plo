@@ -1,0 +1,20 @@
+crypto_scalarmult/curve25519/libsodium_la-scalarmult_curve25519.lo: \
+ crypto_scalarmult/curve25519/scalarmult_curve25519.c \
+ include/sodium/crypto_scalarmult_curve25519.h \
+ /home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stddef.h \
+ include/sodium/export.h \
+ crypto_scalarmult/curve25519/scalarmult_curve25519.h \
+ include/sodium/runtime.h \
+ crypto_scalarmult/curve25519/ref10/x25519_ref10.h
+
+include/sodium/crypto_scalarmult_curve25519.h:
+
+/home/nathan/Documents/github/libstodium/libsodium/android-toolchain-i686/lib/gcc/i686-linux-android/4.8/include/stddef.h:
+
+include/sodium/export.h:
+
+crypto_scalarmult/curve25519/scalarmult_curve25519.h:
+
+include/sodium/runtime.h:
+
+crypto_scalarmult/curve25519/ref10/x25519_ref10.h:
