@@ -2,6 +2,7 @@ package com.tuttlen.android_sqrl;
 
 import android.support.annotation.NonNull;
 import android.test.InstrumentationTestCase;
+import android.util.Base64;
 
 import com.github.dazoe.android.Ed25519;
 import com.igormaznitsa.jbbp.JBBPParser;
@@ -355,12 +356,11 @@ public class ExampleTest extends InstrumentationTestCase {
         String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
         byte[] randomKey = new byte[32];
         Sodium.randombytes_buf(randomKey, 32);
-        String plainText ="";
-
+        android.util.Log.d("test", String.format("RandomKey: %s", AESGCMJni4.bytesToHex(randomKey)));
         String result = crypto.doEncryption(AESGCMJni4.hexStringToByteArray(scrpytPassword),AESGCMJni4.hexStringToByteArray(IV),AESGCMJni4.hexStringToByteArray(aad),new byte[]{},randomKey);
         JSONObject object = new JSONObject(result);
 
-        String decryptResult =crypto.doDecryption(AESGCMJni4.hexStringToByteArray(scrpytPassword),
+        String decryptResult = crypto.doDecryption(AESGCMJni4.hexStringToByteArray(scrpytPassword),
                                 AESGCMJni4.hexStringToByteArray(IV),
                                 AESGCMJni4.hexStringToByteArray(aad),
                                 AESGCMJni4.hexStringToByteArray(object.getString("Tag")),
@@ -368,6 +368,62 @@ public class ExampleTest extends InstrumentationTestCase {
 
         android.util.Log.d("test", String.format("ResultDecryption: %s", decryptResult));
         assertEquals(AESGCMJni4.bytesToHex(randomKey),decryptResult.toUpperCase());
+
+    }
+
+    public void testEd25519ToSodoium() throws Exception
+    {
+        Stodium.StodiumInit();
+        byte[] randomBytes = new byte[64];
+        Sodium.randombytes_buf(randomBytes,64);
+
+        System.out.println(Helper.bytesToHex(randomBytes));
+
+        byte[] edKey = Ed25519.PublicKeyFromPrivateKey(randomBytes);
+        byte[] edkey2 = Helper.PublicKeyFromPrivateKey(randomBytes);
+        String first = Helper.bytesToHex(edkey2);
+        String libKey = Helper.bytesToHex(edKey);
+
+        assertEquals(first,libKey);
+
+        //9U0eUkrV18ObhG+n7M/DqFlxPaSqytkHwL4RLuXtlkbF8JB2XUxF4Lxj0qpe0SI3aLErphECKU6P+1eKBfqYlw==
+    }
+
+    public void testEd25519ToSodoium_fromKnown() throws Exception
+    {
+        Stodium.StodiumInit();
+        String privateKey ="9U0eUkrV18ObhG+n7M/DqFlxPaSqytkHwL4RLuXtlkbF8JB2XUxF4Lxj0qpe0SI3aLErphECKU6P+1eKBfqYlw==";
+        String publicKey = "xfCQdl1MReC8Y9KqXtEiN2ixK6YRAilOj/tXigX6mJc=";
+        byte[] randomPrivate = Base64.decode(privateKey, Base64.DEFAULT);
+
+        byte[] edKey = Ed25519.PublicKeyFromPrivateKey(randomPrivate);
+        byte[] edkey2 = Helper.PublicKeyFromPrivateKey(randomPrivate);
+        String first = Helper.bytesToHex(edkey2);
+        String libKey = Helper.bytesToHex(edKey);
+
+        assertEquals(first,libKey);
+
+        assertEquals(publicKey, Base64.encodeToString(edKey, Base64.DEFAULT | Base64.NO_WRAP));
+        assertEquals(publicKey, Base64.encodeToString(edkey2, Base64.DEFAULT | Base64.NO_WRAP));
+    }
+
+    public void testEd25519ToSodoium_Sign() throws Exception
+    {
+        Stodium.StodiumInit();
+        String privateKey ="9U0eUkrV18ObhG+n7M/DqFlxPaSqytkHwL4RLuXtlkbF8JB2XUxF4Lxj0qpe0SI3aLErphECKU6P+1eKBfqYlw==";
+        String publicKey = "xfCQdl1MReC8Y9KqXtEiN2ixK6YRAilOj/tXigX6mJc=";
+        byte[] randomBuf = new byte[128];
+        Sodium.randombytes_buf(randomBuf,128);
+        byte[] randomPrivate = Base64.decode(privateKey, Base64.DEFAULT);
+
+        byte[] edKey = Ed25519.PublicKeyFromPrivateKey(randomPrivate);
+        byte[] edkey2 = Helper.PublicKeyFromPrivateKey(randomPrivate);
+
+
+        byte[] sodium_result = Helper.Sign(randomBuf, randomPrivate);
+        byte[] ed2_result = Ed25519.Sign(randomBuf, randomPrivate);
+
+        assertEquals(Helper.bytesToHex(sodium_result), Helper.bytesToHex(ed2_result));
 
     }
 

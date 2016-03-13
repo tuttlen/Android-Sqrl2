@@ -23,6 +23,7 @@ public class newuserActivity extends Activity {
         final Button button1 = (Button) findViewById(R.id.button1);
         final Button googleDrive = (Button) findViewById(R.id.driveButton);
 
+        //TODO update this to use the new class
         button1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String user = userEdit.getText().toString();

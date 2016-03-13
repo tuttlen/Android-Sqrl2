@@ -8,7 +8,7 @@ import com.igormaznitsa.jbbp.model.JBBPFieldStruct;
 import java.io.IOException;
 
 /**
- * Created by nathan on 3/9/16.
+ * Created by nathan tuttle on 3/9/16.
  */
 public class SqrlData {
     public byte [] aad;

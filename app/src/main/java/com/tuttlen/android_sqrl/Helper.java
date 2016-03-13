@@ -12,8 +12,13 @@ import org.abstractj.kalium.Sodium;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 /**
- * Created by nathan on 3/9/16.
+ * Created by nathan tuttle on 3/9/16.
+ *
+ * This class will contain a central location for the crypto libraries and general use functions
  */
 public class Helper {
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -77,5 +82,34 @@ public class Helper {
         } else {
             return PK(password,result,iterations,Helper.massXOR(previosResult, result),N,r);
         }
+    }
+
+    // Create the private key from URL and secret key
+    public static byte[] CreatePrivateKey(String domain, byte[] key) {
+        byte[] hmac=null;
+        try {
+            //possibly move in Sodium
+            Sodium.sodium_init();
+            SecretKeySpec pKey = new SecretKeySpec(key, "HmacSHA256");
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(pKey);
+            hmac = mac.doFinal(domain.getBytes());
+        } catch (Exception e) {
+        }
+        return hmac;
+    }
+
+    public static byte[] PublicKeyFromPrivateKey(byte[] privateKey) {
+        Sodium.sodium_init();
+        byte[] publicKey = new byte[32];
+        Sodium.crypto_sign_ed25519_sk_to_pk(publicKey,privateKey);
+        return publicKey;
+    }
+
+    public static byte[] Sign(byte[] message, byte[] privateKey) {
+        Sodium.sodium_init();
+        byte[] signedMessage = new byte[64];
+        Sodium.crypto_sign_ed25519(signedMessage,new int[]{message.length},message,message.length,privateKey);
+        return signedMessage;
     }
 }

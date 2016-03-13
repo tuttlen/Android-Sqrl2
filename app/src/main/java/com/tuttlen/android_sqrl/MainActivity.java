@@ -303,20 +303,20 @@ public class MainActivity extends Activity {
         @Override
         protected String[] doInBackground(String... params) {
             String URL = params[0];
-            byte[] privateKey = CreatePrivateKey(authReq.getDomain(), current_identity.getMasterKey());
+            byte[] privateKey = Helper.CreatePrivateKey(authReq.getDomain(), current_identity.getMasterKey());
 
             byte[] publicKey=null;
             byte[] signature=null;
 
             try {
-                publicKey = Ed25519.PublicKeyFromPrivateKey(privateKey);
-                signature = Ed25519.Sign(URL.getBytes(), privateKey);
+                publicKey = Helper.PublicKeyFromPrivateKey(privateKey);
+                signature = Helper.Sign(URL.getBytes(), privateKey);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            String publicKey_s = Base64.encodeToString(publicKey, Base64.DEFAULT);
-            String sign_s = Base64.encodeToString(signature, Base64.DEFAULT);
+            String publicKey_s = Helper.urlEncode(publicKey);
+            String sign_s = Helper.urlEncode(signature);
             //It's either verified or not
             boolean result = false;
             if(authReq.isBlueTooth) {
@@ -373,20 +373,6 @@ public class MainActivity extends Activity {
             publicKeyText.setText(pubKey);
             signatureText.setText(sign);
         }
-    }
-
-    // Create the private key from URL and secret key
-    public static byte[] CreatePrivateKey(String domain, byte[] key) {
-        byte[] hmac=null;
-        try {
-            SecretKeySpec pKey = new SecretKeySpec(key, "HmacSHA256");
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(pKey);
-            hmac = mac.doFinal(domain.getBytes());
-        } catch (Exception e) {
-        }
-
-        return hmac;
     }
 
     @Override
