@@ -40,10 +40,11 @@ public class LoginActivity extends Activity {
             public void onClick(View v) {
                 String user = users.get(username.getSelectedItemPosition());
                 String pass = passEdit.getText().toString();
-
-                //identity id = loadIdentity(user, pass);
-                //this will be part of the password verification process which calls Scrypt
                 IdentityData id = IdentityData.selectIdentity(userIdentities,user);
+
+                //TODO We use the provided password to pass through scrypt with the known scrypt salt.
+                //this will derive the key and with this key we decrypt and authenticate the data in the sqrl data
+                //packet. I am not sure what value we can authenticate to.
 
                 if (id == null) {
                     Toast.makeText(getApplicationContext(), "Wrong password", Toast.LENGTH_LONG).show();
@@ -77,14 +78,7 @@ public class LoginActivity extends Activity {
             Intent a = new Intent(LoginActivity.this, newuserActivity.class);
             startActivity(a);
         }
-        /*
-        //TODO this will be a screen that calls an API to get SQRL data
-        if (!id.isIdentityCreated(this.getApplicationContext())) {
-            // If not open newidActivity
-            Intent a = new Intent(LoginActivity.this, newuserActivity.class);
-            startActivity(a);
-        }
-        */
+
         addUsersToSpinner(userIdentities);
     }
 

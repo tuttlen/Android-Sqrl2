@@ -211,8 +211,6 @@ public class ExampleTest extends InstrumentationTestCase {
 
     public void testSalsa()  throws GeneralSecurityException
     {
-        //Sodium.sodium_init();
-        Stodium.StodiumInit();
         String saltStr = "62007dc8478a69339b611b7046d6887a";
 
         String expectedReuslt = "5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
@@ -234,8 +232,6 @@ public class ExampleTest extends InstrumentationTestCase {
 
     public void testSalsa2()  throws GeneralSecurityException
     {
-        //Sodium.sodium_init();
-        Stodium.StodiumInit();
         String saltStr = "62007dc8478a69339b611b7046d6887a";
 
         String expectedReuslt = "2f30b9d4e5c48056177ff90a6cc9da04b648a7e8451dfa60da56c148187f6a7d";
@@ -267,7 +263,6 @@ public class ExampleTest extends InstrumentationTestCase {
 
     public void testByteUnPackSQRLData() throws IOException,GeneralSecurityException
     {
-        Stodium.StodiumInit();
         String password= "tttttttttttttttttttttttt";
 
         String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
@@ -306,7 +301,6 @@ public class ExampleTest extends InstrumentationTestCase {
 
     public void testByteUnPackSQRLData_Unencrypt() throws IOException,GeneralSecurityException
     {
-        Stodium.StodiumInit();
         String password= "tttttttttttttttttttttttt";
 
         String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
@@ -349,7 +343,7 @@ public class ExampleTest extends InstrumentationTestCase {
     }
 
     public void testEncryptAADUnencrypt() throws JSONException {
-        Stodium.StodiumInit();
+
         AESGCMJni4 crypto = new AESGCMJni4();
         String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
         String IV = "8c02059cda407590d48eb305";
@@ -373,7 +367,6 @@ public class ExampleTest extends InstrumentationTestCase {
 
     public void testEd25519ToSodoium() throws Exception
     {
-        Stodium.StodiumInit();
         byte[] randomBytes = new byte[64];
         Sodium.randombytes_buf(randomBytes,64);
 
@@ -385,13 +378,10 @@ public class ExampleTest extends InstrumentationTestCase {
         String libKey = Helper.bytesToHex(edKey);
 
         assertEquals(first,libKey);
-
-        //9U0eUkrV18ObhG+n7M/DqFlxPaSqytkHwL4RLuXtlkbF8JB2XUxF4Lxj0qpe0SI3aLErphECKU6P+1eKBfqYlw==
     }
 
     public void testEd25519ToSodoium_fromKnown() throws Exception
     {
-        Stodium.StodiumInit();
         String privateKey ="9U0eUkrV18ObhG+n7M/DqFlxPaSqytkHwL4RLuXtlkbF8JB2XUxF4Lxj0qpe0SI3aLErphECKU6P+1eKBfqYlw==";
         String publicKey = "xfCQdl1MReC8Y9KqXtEiN2ixK6YRAilOj/tXigX6mJc=";
         byte[] randomPrivate = Base64.decode(privateKey, Base64.DEFAULT);
@@ -409,7 +399,6 @@ public class ExampleTest extends InstrumentationTestCase {
 
     public void testEd25519ToSodoium_Sign() throws Exception
     {
-        Stodium.StodiumInit();
         String privateKey ="9U0eUkrV18ObhG+n7M/DqFlxPaSqytkHwL4RLuXtlkbF8JB2XUxF4Lxj0qpe0SI3aLErphECKU6P+1eKBfqYlw==";
         String publicKey = "xfCQdl1MReC8Y9KqXtEiN2ixK6YRAilOj/tXigX6mJc=";
         byte[] randomBuf = new byte[128];
@@ -425,6 +414,58 @@ public class ExampleTest extends InstrumentationTestCase {
 
         assertEquals(Helper.bytesToHex(sodium_result), Helper.bytesToHex(ed2_result));
 
+    }
+
+    public void testHMAC()
+    {
+        String domain ="www.example.com";
+        byte[] randomKey = new byte[32];
+        Sodium.randombytes_buf(randomKey, 32);
+        String current = Helper.bytesToHex(Helper.CreatePrivateHMAC(domain, randomKey));
+        String sodium2 = Helper.bytesToHex(Helper.CreatePrivateKey(domain, randomKey));
+
+        assertEquals(current,sodium2);
+    }
+
+    public void testSHA256()
+    {
+        byte[] randomKey = Helper.CreateRandom(32);
+
+        String current = Helper.bytesToHex(crypto.sha256(randomKey));
+        String sodium2 = Helper.bytesToHex(Helper.SHA256(randomKey));
+
+        assertEquals(current,sodium2);
+
+    }
+
+    public void testFindRightParms() throws JSONException
+    {
+        AESGCMJni4 aescrypto = new AESGCMJni4();
+        String scrpytPassword ="1b10108c15591493aad2bf363877ff7b079361ff0551ba3eb87e17106f59861e";
+        String IV = "c32b48ad60f81a5256a977bb";
+        String aad = "9d0001002d00c32b48ad60f81a5256a977bbbb010194d66d890a372dd9f2a0a6f460094d000000f10004050f00";
+        String eIDMK ="c0120b09e3b1f383bcb2326f99710701156434383b614ed2b3a17b03a5f50ba2";
+        String uIDMK =aescrypto.doDecryption(
+                Helper.hexStringToByteArray(scrpytPassword),
+                Helper.hexStringToByteArray(IV),
+                Helper.hexStringToByteArray(aad),
+                new byte[]{}, //no tag
+                Helper.hexStringToByteArray(eIDMK));
+
+        //Is the verification tag the tail of the hash or the AES tag?
+        String vTag ="f48476adda8e21290383ed5100b705c9";
+
+        String result = Helper.massXOR("1b10108c15591493aad2bf363877ff7b079361ff0551ba3eb87e17106f59861e",eIDMK);
+        byte[] hashed =Helper.SHA256(Helper.hexStringToByteArray(result));
+        String hashed_result =Helper.bytesToHex(hashed);
+        android.util.Log.d("test",String.format("hashed: %s",hashed_result));
+        assertFalse(hashed_result.contains(vTag));
+
+        result = Helper.massXOR("1b10108c15591493aad2bf363877ff7b079361ff0551ba3eb87e17106f59861e",uIDMK);
+        hashed =Helper.SHA256(Helper.hexStringToByteArray(result));
+        hashed_result =Helper.bytesToHex(hashed);
+        android.util.Log.d("test",String.format("hashed: %s",hashed_result));
+        assertFalse(hashed_result.contains(vTag));
     }
 
 }
