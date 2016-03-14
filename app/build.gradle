@@ -14,9 +14,6 @@ android {
         multiDexEnabled true
 
         ndk {
-            moduleName "androidEd25519"
-        }
-        ndk {
             moduleName "libstodium"
         }
 
@@ -55,26 +52,25 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
-    compile 'com.igormaznitsa:jbbp:1.2.0'
-    compile 'com.google.android.gms:play-services-identity:7.8.0'
     compile('com.google.api-client:google-api-client-android:1.20.0') {
         exclude group: 'org.apache.httpcomponents'
     }
     compile('com.google.apis:google-api-services-drive:v3-rev6-1.20.0') {
         exclude group: 'org.apache.httpcomponents'
     }
-    compile 'com.google.zxing:android-core:3.2.1'
-    compile 'com.google.zxing:android-integration:3.2.1'
 
     //from http://stackoverflow.com/questions/27366430/getting-nosuchfielderror-instance-org-apache-http-message-basicheadervalueparser
     compile('org.apache.httpcomponents:httpmime:4.5.1') {
         exclude module: 'httpclient'
     }
-    compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
     androidTestCompile 'junit:junit:4.12'
-    compile project(':androidEd25519')
     compile project(':libstodium')
     compile project(':Crypto')
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.igormaznitsa:jbbp:1.2.0'
+    compile 'com.google.android.gms:play-services-identity:8.4.0'
+    compile 'com.google.zxing:android-core:3.2.1'
+    compile 'com.google.zxing:android-integration:3.2.1'
+    compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
 }

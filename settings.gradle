@@ -1,3 +1,1 @@
 include ':app', ':libstodium', ':Crypto'
-include ':androidEd25519'
-include ':androidEd25519'
