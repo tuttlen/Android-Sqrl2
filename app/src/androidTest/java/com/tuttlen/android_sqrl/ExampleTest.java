@@ -3,6 +3,8 @@ package com.tuttlen.android_sqrl;
 import android.test.InstrumentationTestCase;
 import android.util.Base64;
 
+import com.igormaznitsa.jbbp.JBBPParser;
+import com.igormaznitsa.jbbp.io.JBBPOut;
 import com.tuttlen.aesgcm_android.AESGCMJni4;
 
 import org.abstractj.kalium.Sodium;
@@ -261,6 +263,51 @@ public class ExampleTest extends InstrumentationTestCase {
         byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor, 256);
         android.util.Log.d("test", String.format("Result: %s",Helper.bytesToHex(scrypekey)));
         assertEquals(scrpytPassword,Helper.bytesToHex(scrypekey));
+
+    }
+
+    public void testBytePackSQRLData() throws IOException,GeneralSecurityException
+    {
+        String password= "tttttttttttttttttttttttt";
+        String randomExpected =Helper.bytesToHex(Helper.CreateRandom(32));
+
+        String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
+        String sqrlBase = sqrlData.substring(8);
+        byte[] hexResult = Helper.urlDecode(sqrlBase);
+
+        SqrlData parsed = SqrlData.ExtractSqrlData(hexResult);
+
+        String result_hex = Helper.bytesToHex(SqrlData.WriteSqrlData(parsed));
+
+        assertTrue("Re-encoded packet does not look the same!",Helper.bytesToHex(hexResult).contains(result_hex));
+
+        parsed.sqrlStorage.IDMK = Helper.hexStringToByteArray(randomExpected);
+
+        result_hex = Helper.bytesToHex(SqrlData.WriteSqrlData(parsed));
+
+        assertFalse("We changed the packet but it is still the same!",Helper.bytesToHex(hexResult).contains(result_hex));
+
+        SqrlData parsed2 = SqrlData.ExtractSqrlData(Helper.hexStringToByteArray(result_hex));
+
+        assertNotSame("Datum are still the same even after changing the IDMK!",parsed.sqrlStorage.IDMK,parsed2.sqrlStorage.IDMK);
+        assertEquals("Datum does not contain the updated value!",Helper.bytesToHex(parsed2.sqrlStorage.IDMK),randomExpected);
+
+    }
+
+    public void testBytePackSQRLData_same() throws IOException,GeneralSecurityException
+    {
+        String password= "tttttttttttttttttttttttt";
+
+        String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
+        String sqrlBase = sqrlData.substring(8);
+        byte[] hexResult = Helper.urlDecode(sqrlBase);
+
+        SqrlData parsed = SqrlData.ExtractSqrlData(hexResult);
+
+        parsed.sqrlStorage.IDMK = Helper.CreateRandom(32);
+
+
+        android.util.Log.d("test",Helper.bytesToHex(SqrlData.WriteSqrlData(parsed)));
 
     }
 
