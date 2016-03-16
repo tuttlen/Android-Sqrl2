@@ -398,7 +398,9 @@ public class ExampleTest extends InstrumentationTestCase {
         assertEquals(current,sodium2);
 
     }
-
+    /*
+        This test will fail when we decrypt a packet.
+     */
     public void testFindRightParms() throws JSONException
     {
         AESGCMJni4 aescrypto = new AESGCMJni4();
