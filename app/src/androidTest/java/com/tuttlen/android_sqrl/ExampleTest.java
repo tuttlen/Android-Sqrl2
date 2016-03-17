@@ -294,9 +294,48 @@ public class ExampleTest extends InstrumentationTestCase {
 
     }
 
-    public void testBytePackSQRLData_same() throws IOException,GeneralSecurityException
+    public void testSQRLData_createSimpleIdentity() throws IOException,GeneralSecurityException,JSONException
     {
-        String password= "tttttttttttttttttttttttt";
+        AESGCMJni4 aescrypto = new AESGCMJni4();
+        String password= "tt";
+
+        String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
+        String sqrlBase = sqrlData.substring(8);
+        byte[] hexResult = Helper.urlDecode(sqrlBase);
+
+        SqrlData parsed = SqrlData.ExtractSqrlData(hexResult);
+
+        byte[] randomKey = Helper.CreateRandom(32);
+        parsed.sqrlStorage.ScryptIteration =2;
+        parsed.sqrlStorage.IV = Helper.CreateRandom(12);
+        parsed.sqrlStorage.ScryptSalt =Helper.CreateRandom(16);
+        parsed.sqrlStorage.nFactor =9;
+
+        byte[] newSqrlData = SqrlData.WriteSqrlData(parsed);
+        SqrlData parsed2 = SqrlData.ExtractSqrlData(newSqrlData);
+
+        byte[] scryptPassword = Helper.PK(password.getBytes(),parsed.sqrlStorage.ScryptSalt,parsed.sqrlStorage.ScryptIteration,new byte[]{},1<<parsed.sqrlStorage.nFactor);
+        android.util.Log.d("test",String.format("UNEncrypted Shareable IMK: %s",Helper.bytesToHex(randomKey)));
+        String cryptoResult =aescrypto.doEncryption(scryptPassword, parsed.sqrlStorage.IV, parsed2.aad, new byte[16], randomKey);
+        //TODO there is probably a less messy way of doing this
+        JSONObject object = new JSONObject(cryptoResult);
+
+        parsed2.sqrlStorage.IDMK= Helper.hexStringToByteArray(object.getString("CipherText"));
+        parsed2.sqrlStorage.tag=Helper.hexStringToByteArray(object.getString("Tag"));
+
+        android.util.Log.d("test",String.format("Scrypt Password: %s",Helper.bytesToHex(scryptPassword)));
+        android.util.Log.d("test",String.format("Encrypted Shareable IMK: %s",object.getString("CipherText")));
+        android.util.Log.d("test",String.format("Tag: %s",object.getString("Tag")));
+        android.util.Log.d("test",String.format("Iv: %s",Helper.bytesToHex(parsed.sqrlStorage.IV)));
+        android.util.Log.d("test",String.format("Salt: %s",Helper.bytesToHex(parsed.sqrlStorage.ScryptSalt)));
+
+        android.util.Log.d("test", SqrlData.ExportSqrlData(parsed2));
+
+    }
+
+    public void testBytePackSQRLData_changePassword() throws IOException,GeneralSecurityException
+    {
+        String password= "tt";
 
         String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
         String sqrlBase = sqrlData.substring(8);
@@ -459,6 +498,20 @@ public class ExampleTest extends InstrumentationTestCase {
         assertEquals(Helper.bytesToHex(datapacket.sqrlStorage.IDMK),Identity_MasterKey);
         assertEquals(Helper.bytesToHex(datapacket.aad),aad);
 
+    }
+
+    public void testUrlEncode() {
+
+        String urlOneEqul2 = "aa";
+        String urlOneEqul1 = "aaa";
+        String urlOneEqul0 = "aaaa";
+        String test1 = Helper.bytesToHex(Helper.urlDecode(urlOneEqul2));
+        String test2 = Helper.bytesToHex(Helper.urlDecode(urlOneEqul1));
+        String test3 = Helper.bytesToHex(Helper.urlDecode(urlOneEqul0));
+
+        assertEquals("69",test1);
+        assertEquals("69a6",test2);
+        assertEquals("69a69a",test3);
     }
 
 }
