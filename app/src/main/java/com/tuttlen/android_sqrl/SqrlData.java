@@ -56,4 +56,14 @@ public class SqrlData {
         //into this structure
         return bytesOut;
     }
+
+    public static String ExportSqrlData(SqrlData data) throws IOException {
+
+        byte[] bytesOut = JBBPOut.BeginBin(JBBPByteOrder.LITTLE_ENDIAN).Bin(data.sqrlStorage).End().toByteArray();
+        //TODO soon there will be multiple types at that point we would have an array of types and output the entire array
+        //into this structure
+        //TODO add type
+        String rawCode = "SQRLDATA"+Helper.urlEncode(bytesOut);
+        return rawCode;
+    }
 }

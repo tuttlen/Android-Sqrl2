@@ -67,12 +67,12 @@ public class Helper {
 
     public static byte[] urlDecode(String target) {
         target = target.replace("+", "/").replace("_", "-");
-        return Base64.decode(target, Base64.DEFAULT);
+        return Base64.decode(target, Base64.DEFAULT| Base64.NO_WRAP);
     }
 
     public static String urlEncode(byte[] target) {
-        String base64 = Base64.encodeToString(target, Base64.DEFAULT);
-        return base64.replace("/", "+").replace("-", "_");
+        String base64 = Base64.encodeToString(target, Base64.DEFAULT| Base64.NO_WRAP);
+        return base64.replace("/", "+").replace("-", "_").replace("=","");
 
     }
 
