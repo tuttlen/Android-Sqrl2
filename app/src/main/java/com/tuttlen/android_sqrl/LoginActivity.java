@@ -1,6 +1,7 @@
 package com.tuttlen.android_sqrl;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 
 import android.os.Bundle;
@@ -8,11 +9,17 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 //import org.apache.http.NameValuePair;
 
+import com.android.internal.util.Predicate;
+import com.tuttlen.aesgcm_android.AESGCMJni4;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,36 +34,88 @@ public class LoginActivity extends Activity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        final AESGCMJni4 aesCrypto = new AESGCMJni4();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         username = (Spinner) findViewById(R.id.userSpinner);
         final EditText passEdit = (EditText) findViewById(R.id.publicKeyText);
 
         // Add listener on loginbutton
         final Button loginButton = (Button) findViewById(R.id.button1);
+
+
         loginButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String user = users.get(username.getSelectedItemPosition());
-                String pass = passEdit.getText().toString();
-                IdentityData id = IdentityData.selectIdentity(userIdentities,user);
+                final String user = users.get(username.getSelectedItemPosition());
+                final String pass = passEdit.getText().toString();
+                final IdentityData id = IdentityData.selectIdentity(userIdentities,user);
 
                 //TODO We use the provided password to pass through scrypt with the known scrypt salt.
                 //this will derive the key and with this key we decrypt and authenticate the data in the sqrl data
                 //packet. I am not sure what value we can authenticate to.
+                try {
+                    final SqrlData data = IdentityData.LoadSqrlData(id);
+                    final ProgressDialog pDialog = new ProgressDialog(v.getContext());
+                    //final ProgressBar pBar = new ProgressBar(v.getContext());
+                    //pBar.setMax(data.sqrlStorage.ScryptIteration);
+                    pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    pDialog.setMax(data.sqrlStorage.ScryptIteration);
 
-                if (id == null) {
-                    Toast.makeText(getApplicationContext(), "Wrong password", Toast.LENGTH_LONG).show();
+
+                    final Predicate<Integer> runthis = new Predicate<Integer>() {
+                        @Override
+                        public boolean apply(Integer integer) {
+                            pDialog.setProgress(integer);
+                            return true;
+                        }
+                    };
+
+
+                    //byte[]  keyresult = Helper.PK(pass.getBytes(),data.sqrlStorage.ScryptSalt,data.sqrlStorage.ScryptIteration,new byte[]{},1 <<data.sqrlStorage.nFactor, runthis);
+                    //for debug purposes
+
+                    final byte[]  keyresult = new byte[32];
+                    Thread runScrypt = new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                byte[] scryptResult = Helper.PK(pass.getBytes(), data.sqrlStorage.ScryptSalt, data.sqrlStorage.ScryptIteration, new byte[]{}, 1 << data.sqrlStorage.nFactor, runthis);
+                                //System.arraycopy(scryptResult,0,keyresult,0,keyresult.length);
+                                String result_uIDMK = aesCrypto.doDecryption(scryptResult, data.sqrlStorage.IV, data.aad, data.sqrlStorage.tag, data.sqrlStorage.IDMK);
+
+                                if (!Helper.determineAuth(result_uIDMK) && false) { //for debug purposes
+                                    Toast.makeText(getApplicationContext(), "Wrong password", Toast.LENGTH_LONG).show();
+                                }
+                                else
+                                {
+                                    // Send object back to parent
+                                    Intent output = new Intent();
+                                    output.putExtra("sqrlid",id);
+                                    setResult(Activity.RESULT_OK, output);
+                                    finish();
+                                    //Intent a = new Intent(LoginActivity.this, MainActivity.class);
+                                    //startActivity(a);
+                                }
+                                pDialog.dismiss();
+                            } catch(GeneralSecurityException ex)
+                            {
+                                Toast.makeText(getApplicationContext(), "Security failed", Toast.LENGTH_LONG).show();
+                            }
+                        }
+
+                    };
+                    pDialog.show(LoginActivity.this,"Unencrypting","Unencrypting...");
+
+                    runScrypt.start();
+
+
+                } catch(IOException e) {
+                    Toast.makeText(getApplicationContext(), "Failed to load SQRLdata", Toast.LENGTH_LONG).show();
                 }
-                else
-                {
-                    // Send object back to parent
-                    Intent output = new Intent();
-                    output.putExtra("sqrlid",id);
-                    setResult(Activity.RESULT_OK, output);
-                    finish();
-                }
+
+
             }  });
 
         // Add listener on new user button button

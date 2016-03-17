@@ -16,6 +16,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
@@ -44,6 +45,20 @@ public class IdentityData implements Serializable{
             }
         }
         return null;
+    }
+
+    public static SqrlData LoadSqrlData(IdentityData data) throws IOException
+    {
+        String sqrlDataPrefix = new String(data.idContents, StandardCharsets.UTF_8);
+        //TODO determine whether this is a binary stream or a regular bas64 stream
+        if(sqrlDataPrefix.substring(0,8).contains("sqrldata")) {
+            byte[] theData = new byte[data.idContents.length -8];
+            System.arraycopy(data.idContents,8,theData,0,theData.length);
+            return SqrlData.ExtractSqrlData(theData);
+        } else {
+            byte[] theData = Helper.urlDecode(sqrlDataPrefix.substring(8));
+            return SqrlData.ExtractSqrlData(theData);
+        }
     }
 
     public static void save(Context con, ArrayList<IdentityData> identities) {

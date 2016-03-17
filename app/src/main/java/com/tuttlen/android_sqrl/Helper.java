@@ -2,6 +2,7 @@ package com.tuttlen.android_sqrl;
 
 import android.util.Base64;
 
+import com.android.internal.util.Predicate;
 import com.igormaznitsa.jbbp.JBBPParser;
 import com.igormaznitsa.jbbp.mapper.Bin;
 import com.igormaznitsa.jbbp.model.JBBPFieldArrayByte;
@@ -75,21 +76,38 @@ public class Helper {
 
     }
 
-    //PBKDF(2)
-    public static byte[] PK(byte[] password, byte[] salt, int iterations, byte[] previosResult, int N, int r) throws GeneralSecurityException {
-        int p = 1;
+    public static byte[] PK(byte[] password, byte[] salt, int iterations, byte[] previosResult, int N) throws GeneralSecurityException {
+        return PK(password, salt, iterations, previosResult, N, null);
+    }
 
+    //PBKDF(2)
+    public static byte[] PK(byte[] password, byte[] salt, int iterations, byte[] previosResult, int N, Predicate<Integer> run ) throws GeneralSecurityException {
+        int p = 1;
+        int r =256;
         byte[] result = new byte[32];
         Sodium.crypto_pwhash_scryptsalsa208sha256_ll(password, password.length, salt, salt.length, N, r, p, result, result.length);
         iterations--;
+
+        if(run != null) run.apply(iterations);
+
         android.util.Log.d("PK", String.format("On iteration %d: %s", iterations, Helper.bytesToHex(result)));
         if (iterations == 0 && previosResult.length == 0) return result;
         if (iterations == 0) return Helper.massXOR(result, previosResult);
         if (previosResult.length == 0) {
-            return PK(password, result, iterations, result, N, r);
+            return PK(password, result, iterations, result, N);
         } else {
-            return PK(password, result, iterations, Helper.massXOR(previosResult, result), N, r);
+            return PK(password, result, iterations, Helper.massXOR(previosResult, result), N);
         }
+    }
+
+    public static boolean determineAuth(String authString)
+    {
+        byte[] unEncode = Helper.hexStringToByteArray(authString);
+        int result = 0;
+        for (int i = 0; i < unEncode.length; i++) {
+            result += unEncode[i];
+        }
+        return result > 0;
     }
 
     // Create the private key from URL and secret key

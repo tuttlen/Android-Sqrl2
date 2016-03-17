@@ -191,7 +191,7 @@ public class ExampleTest extends InstrumentationTestCase {
         int p = 1;
         int iterations = 85;
 
-        String result2 = Helper.bytesToHex(Helper.PK(password, Helper.hexStringToByteArray(saltStr), iterations, new byte[]{}, N, r));
+        String result2 = Helper.bytesToHex(Helper.PK(password, Helper.hexStringToByteArray(saltStr), iterations, new byte[]{}, N));
 
 
         assertEquals(expectedReuslt, result2);
@@ -220,7 +220,7 @@ public class ExampleTest extends InstrumentationTestCase {
         for (int i = 0; i < 16; i++) {
             saltStr = saltStr.substring(2);
             android.util.Log.d("test",String.format("Salt: %s",saltStr));
-            String result2 = Helper.bytesToHex(Helper.PK(password, Helper.hexStringToByteArray(saltStr), iterations, new byte[]{}, N, r));
+            String result2 = Helper.bytesToHex(Helper.PK(password, Helper.hexStringToByteArray(saltStr), iterations, new byte[]{}, N));
             android.util.Log.d("test",String.format("Pasword: %s",result2));
         }
 
@@ -260,7 +260,7 @@ public class ExampleTest extends InstrumentationTestCase {
         assertEquals(Helper.hexStringToByteArray(scryptSalt).length,16);
         android.util.Log.d("test", String.format("Password: %s", Helper.bytesToHex(password.getBytes())));
         android.util.Log.d("test", String.format("Iterations: %d",parsed.sqrlStorage.ScryptIteration));
-        byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor, 256);
+        byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor);
         android.util.Log.d("test", String.format("Result: %s",Helper.bytesToHex(scrypekey)));
         assertEquals(scrpytPassword,Helper.bytesToHex(scrypekey));
 
@@ -307,7 +307,7 @@ public class ExampleTest extends InstrumentationTestCase {
         parsed.sqrlStorage.IDMK = Helper.CreateRandom(32);
 
 
-        android.util.Log.d("test",Helper.bytesToHex(SqrlData.WriteSqrlData(parsed)));
+        android.util.Log.d("test", Helper.bytesToHex(SqrlData.WriteSqrlData(parsed)));
 
     }
 
@@ -343,7 +343,7 @@ public class ExampleTest extends InstrumentationTestCase {
         assertEquals(Helper.hexStringToByteArray(scryptSalt).length, 16);
         android.util.Log.d("PK", String.format("Password: %s", Helper.bytesToHex(password.getBytes())));
         android.util.Log.d("PK", String.format("Iterations: %d", parsed.sqrlStorage.ScryptIteration));
-        byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor, 256);
+        byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor);
         android.util.Log.d("PK", String.format("Result: %s", Helper.bytesToHex(scrypekey)));
 
         AESGCMJni4 crypto = new AESGCMJni4();
@@ -429,6 +429,36 @@ public class ExampleTest extends InstrumentationTestCase {
         hashed_result =Helper.bytesToHex(hashed);
         android.util.Log.d("test",String.format("hashed: %s",hashed_result));
         assertFalse(hashed_result.contains(vTag));
+    }
+
+    public void testSqrlData() throws IOException
+    {
+        String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
+        String Identity_MasterKey ="64a96b114619d42c480635a946999b098dcfe07f6ff7d8f5e96ad7236eb60c56";
+        String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
+        IdentityData data = new IdentityData("test","0000","",true);
+        data.idContents = sqrlData.getBytes();
+
+        SqrlData datapacket= IdentityData.LoadSqrlData(data);
+
+        assertEquals(Helper.bytesToHex(datapacket.sqrlStorage.IDMK), Identity_MasterKey);
+        assertEquals(Helper.bytesToHex(datapacket.aad), aad);
+
+    }
+
+    public void testSqrlData2_rawdata() throws IOException
+    {
+        String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
+        String Identity_MasterKey ="64a96b114619d42c480635a946999b098dcfe07f6ff7d8f5e96ad7236eb60c56";
+        String sqrlData ="c3FybGRhdGGdAAEALQCMAgWc2kB1kNSOswViAH3IR4ppM5thG3BG1oh6CVUAAADxAAQFDwBkqWsRRhnULEgGNalGmZsJjc+gf2+32PXpatcjbrYMVkg+iQwaGors3TmDqBDNxB2CIPvZyqPmoeYqKI+zxOF+RFIkPpoC9Fw+dc12lKCWHiXUVvWdsDhOIfdOTTNHRsTRlyqFRqPgzggu7zoqYSQACACqmidMXJq+KOFhQIQI4epIJTQAAAC2zqEzicwSTjF2bJCZ3Um6iOyVqDwjpxVvaZrgHcKkgGUucMJV3TrqRoH0aOm1EQ";
+        IdentityData data = new IdentityData("test","0000","",true);
+        data.idContents = Helper.urlDecode(sqrlData);
+
+        SqrlData datapacket= IdentityData.LoadSqrlData(data);
+
+        assertEquals(Helper.bytesToHex(datapacket.sqrlStorage.IDMK),Identity_MasterKey);
+        assertEquals(Helper.bytesToHex(datapacket.aad),aad);
+
     }
 
 }

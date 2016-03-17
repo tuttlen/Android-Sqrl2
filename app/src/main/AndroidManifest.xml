@@ -25,10 +25,19 @@
         android:theme="@style/AppTheme">
 
         <activity
+            android:name="com.tuttlen.android_sqrl.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name="com.tuttlen.android_sqrl.GoogleDriveActivity"
             android:label="Google Drive" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -38,15 +47,7 @@
             android:label="@string/title_activity_auth_request"
             android:theme="@style/AppTheme.NoActionBar" />
 			
-        <activity
-            android:name="com.tuttlen.android_sqrl.MainActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
 		<activity android:name=".CaptureActivity"
             android:clearTaskOnLaunch="true"
             android:stateNotNeeded="true"

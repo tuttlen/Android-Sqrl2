@@ -222,7 +222,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (current_identity == null) {
+        if (current_identity == null && current_sqrl_identity == null) {
             // Show login form
             Intent loginAct = new Intent(MainActivity.this, LoginActivity.class);
             startActivityForResult(loginAct, 54321);
