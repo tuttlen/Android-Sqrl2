@@ -34,6 +34,6 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         String URL ="sqrl://www.grc.com/sqrl?nut=oh5REYgoyG10VejQYz7pcA&sfn=R1JD";
         byte[] signature =Helper.Sign(URL.getBytes(),Helper.urlDecode(privateKey));
         String message ="sqrl://www.grc.com/sqrl?nut=oh5REYgoyG10VejQYz7pcA&sfn=R1JD";
-        testActivity.web_post3(URL,message,Helper.urlEncode(signature),publicKey);
+        testActivity.web_post3(URL,message,Helper.urlEncode(signature),publicKey,Helper.urlDecode(privateKey));
     }
 }

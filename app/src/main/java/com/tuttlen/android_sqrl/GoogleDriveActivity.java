@@ -57,6 +57,7 @@ public class GoogleDriveActivity extends Activity {
     private ListView identityList;
     private IdentitiesAdapter adapter;
     private Button btnAddIds;
+    private Button btnCancelIds;
     ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
@@ -114,6 +115,18 @@ public class GoogleDriveActivity extends Activity {
                 newTask.execute();
             }
         });
+        btnCancelIds = new Button(this);
+        btnCancelIds.setLayoutParams(tlp);
+        btnCancelIds.setEnabled(true);
+        btnCancelIds.setText("Cancel");
+        btnCancelIds.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                Intent a = new Intent(GoogleDriveActivity.this, LoginActivity.class);
+                                                startActivity(a);
+                                            }
+                                        }
+        );
         activityLayout.addView(btnAddIds);
 
         mProgress = new ProgressDialog(this);

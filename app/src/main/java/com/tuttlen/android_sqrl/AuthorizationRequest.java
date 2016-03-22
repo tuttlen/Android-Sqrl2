@@ -51,15 +51,13 @@ public class AuthorizationRequest implements IAuthorizationRequest{
     @Override
     public String getReturnURL() {
         if(isConnectionPicky) {
-            if(this.CalledUrl.contains("sqrl://")) {
-                return  this.CalledUrl.substring(0, this.CalledUrl.indexOf("?")).replace("sqrl://", "https://");
-            }else if (this.CalledUrl.contains("qrl://")) {
+            if (this.CalledUrl.contains("sqrl://")) {
+                return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?")).replace("sqrl://", "https://");
+            } else if (this.CalledUrl.contains("qrl://")) {
                 return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?")).replace("qrl://", "http://");
             }
-            return this.CalledUrl;
-        } else {
-            return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?"));
         }
+        return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?"));
     }
 
     @Override

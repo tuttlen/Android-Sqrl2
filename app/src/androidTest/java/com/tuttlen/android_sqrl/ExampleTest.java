@@ -51,6 +51,7 @@ public class ExampleTest extends InstrumentationTestCase {
         String testReuslt = req.getDomain();
         assertEquals("example.com",testReuslt);
         //if we understand how to construct a sqrl then we should expect to understand how to handle the protocol
+        req.isConnectionPicky=false;
         assertEquals("sqrl://example.com/sqrl",req.getReturnURL());
     }
 
@@ -240,12 +241,12 @@ public class ExampleTest extends InstrumentationTestCase {
 
         String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
         String IV = "8c02059cda407590d48eb305";
-        String tag ="4452243e9a02f45c3f75cd7694a0961e";
+        String tag ="fd114890fa680bd170fdd735da528258";
         int nfactor  = 512;
         int iteration = 85;
         String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
-        String Identity_MasterKey ="64a96b114619d42c480635a946999b098dcfe07f6ff7d8f5e96ad7236eb60c56";
-        String Identity_LockKey ="483f890c1a1a8aecdd3983a810cdc41d8220fbd9caa3e6a1e62a288ff3c4e17f";
+        String Identity_MasterKey ="64a96b114619d42c480635bea51a666c26373f81fdbfdf63d7a5ab5c8dbad831";
+        String Identity_LockKey ="5920fe2430686a2bb374e60ea0433710760883ef672a8f9a8798a8a23fcf1385";
         String scryptSalt ="62007dc8478a69339b611b7046d6887a";
 
         assertEquals(IV,Helper.bytesToHex(parsed.sqrlStorage.IV));
@@ -362,12 +363,12 @@ public class ExampleTest extends InstrumentationTestCase {
 
         String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
         String IV = "8c02059cda407590d48eb305";
-        String tag ="4452243e9a02f45c3f75cd7694a0961e";
+        String tag ="fd114890fa680bd170fdd735da528258";
         int nfactor  = 512;
         int iteration = 85;
         String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
-        String Identity_MasterKey ="64a96b114619d42c480635a946999b098dcfe07f6ff7d8f5e96ad7236eb60c56";
-        String Identity_LockKey ="483f890c1a1a8aecdd3983a810cdc41d8220fbd9caa3e6a1e62a288ff3c4e17f";
+        String Identity_MasterKey ="64a96b114619d42c480635bea51a666c26373f81fdbfdf63d7a5ab5c8dbad831";
+        String Identity_LockKey ="5920fe2430686a2bb374e60ea0433710760883ef672a8f9a8798a8a23fcf1385";
         String scryptSalt ="62007dc8478a69339b611b7046d6887a";
 
         assertEquals(IV,Helper.bytesToHex(parsed.sqrlStorage.IV));
@@ -386,7 +387,7 @@ public class ExampleTest extends InstrumentationTestCase {
         android.util.Log.d("PK", String.format("Result: %s", Helper.bytesToHex(scrypekey)));
 
         AESGCMJni4 crypto = new AESGCMJni4();
-        String result = crypto.doDecryption(scrypekey, parsed.sqrlStorage.IV, parsed.aad, parsed.sqrlStorage.tag, parsed.sqrlStorage.IDLK);
+        String result = crypto.doDecryption(scrypekey, parsed.sqrlStorage.IV, parsed.aad, parsed.sqrlStorage.tag, parsed.sqrlStorage.IDMK);
         android.util.Log.d("test", String.format("ResultDecryption: %s", result));
 
         assertEquals(scrpytPassword, Helper.bytesToHex(scrypekey));
@@ -399,8 +400,7 @@ public class ExampleTest extends InstrumentationTestCase {
         String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
         String IV = "8c02059cda407590d48eb305";
         String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
-        byte[] randomKey = new byte[32];
-        Sodium.randombytes_buf(randomKey, 32);
+        byte[] randomKey = Helper.CreateRandom(32);
         android.util.Log.d("test", String.format("RandomKey: %s", AESGCMJni4.bytesToHex(randomKey)));
         String result = crypto.doEncryption(AESGCMJni4.hexStringToByteArray(scrpytPassword), AESGCMJni4.hexStringToByteArray(IV), AESGCMJni4.hexStringToByteArray(aad), new byte[]{}, randomKey);
         JSONObject object = new JSONObject(result);
@@ -473,7 +473,7 @@ public class ExampleTest extends InstrumentationTestCase {
     public void testSqrlData() throws IOException
     {
         String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
-        String Identity_MasterKey ="64a96b114619d42c480635a946999b098dcfe07f6ff7d8f5e96ad7236eb60c56";
+        String Identity_MasterKey ="64a96b114619d42c480635bea51a666c26373f81fdbfdf63d7a5ab5c8dbad831";
         String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
         IdentityData data = new IdentityData("test","0000","",true);
         data.idContents = sqrlData.getBytes();
@@ -488,8 +488,8 @@ public class ExampleTest extends InstrumentationTestCase {
     public void testSqrlData2_rawdata() throws IOException
     {
         String aad = "9d0001002d008c02059cda407590d48eb30562007dc8478a69339b611b7046d6887a0955000000f10004050f00";
-        String Identity_MasterKey ="64a96b114619d42c480635a946999b098dcfe07f6ff7d8f5e96ad7236eb60c56";
-        String sqrlData ="c3FybGRhdGGdAAEALQCMAgWc2kB1kNSOswViAH3IR4ppM5thG3BG1oh6CVUAAADxAAQFDwBkqWsRRhnULEgGNalGmZsJjc+gf2+32PXpatcjbrYMVkg+iQwaGors3TmDqBDNxB2CIPvZyqPmoeYqKI+zxOF+RFIkPpoC9Fw+dc12lKCWHiXUVvWdsDhOIfdOTTNHRsTRlyqFRqPgzggu7zoqYSQACACqmidMXJq+KOFhQIQI4epIJTQAAAC2zqEzicwSTjF2bJCZ3Um6iOyVqDwjpxVvaZrgHcKkgGUucMJV3TrqRoH0aOm1EQ";
+        String Identity_MasterKey ="64a96b114619d42c480635bea51a666c26373f81fdbfdf63d7a5ab5c8dbad831";
+        String sqrlData ="c3FybGRhdGGdAAEALQCMAgWc2kB1kNSOswViAH3IR4ppM5thG3BG1oh6CVUAAADxAAQFDwBkqWsRRhnULEgGNb6lGmZsJjc/gf2/32PXpatcjbrYMVkg/iQwaGors3TmDqBDNxB2CIPvZyqPmoeYqKI/zxOF/RFIkPpoC9Fw/dc12lKCWHiXUVv7Wdv4DhOIfdOTTNHRsTRlyqFRqPgzggu7zoqYSQACACqmidMXJq/KOFhQIQI4epIJTQAAAC3+zqEzicwSTjF2bJCZ3Um6iOyVqDwjpxVvaZrgHcKkgGUucMJV3TrqRoH0aOm1EQ==";
         IdentityData data = new IdentityData("test","0000","",true);
         data.idContents = Helper.urlDecode(sqrlData);
 
