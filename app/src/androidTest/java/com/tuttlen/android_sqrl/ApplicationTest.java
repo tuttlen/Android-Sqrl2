@@ -25,4 +25,15 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         String testReuslt = req.getDomain();
         assertEquals(testReuslt,"");
     }
+
+    public void testPostSqrl()
+    {
+        String privateKey ="9U0eUkrV18ObhG+n7M/DqFlxPaSqytkHwL4RLuXtlkbF8JB2XUxF4Lxj0qpe0SI3aLErphECKU6P+1eKBfqYlw==";
+        String publicKey = "xfCQdl1MReC8Y9KqXtEiN2ixK6YRAilOj/tXigX6mJc=";
+        MainActivity testActivity = new MainActivity();
+        String URL ="sqrl://www.grc.com/sqrl?nut=oh5REYgoyG10VejQYz7pcA&sfn=R1JD";
+        byte[] signature =Helper.Sign(URL.getBytes(),Helper.urlDecode(privateKey));
+        String message ="sqrl://www.grc.com/sqrl?nut=oh5REYgoyG10VejQYz7pcA&sfn=R1JD";
+        testActivity.web_post3(URL,message,Helper.urlEncode(signature),publicKey);
+    }
 }

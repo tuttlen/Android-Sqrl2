@@ -20,6 +20,7 @@ public class AuthorizationRequest implements IAuthorizationRequest{
     protected  boolean isSecure = false;
     protected Pattern regSQRLPattern = Pattern.compile("(http|https|sqrl):\\/\\/(.*?)\\/(.*)");
     protected Pattern bToothSQRLPattern  = Pattern.compile("(([0-9A-Fa-f]{2}[:-])+([0-9A-Fa-f]{2}))");
+    protected  boolean isConnectionPicky =true;
 
     @Override
     public boolean isHTTPS() {
@@ -35,6 +36,11 @@ public class AuthorizationRequest implements IAuthorizationRequest{
         }
     }
 
+    public String getFullUrl()
+    {
+        return this.CalledUrl;
+    }
+
     //This may be different then Id I haven't decided yet
     @Override
     public String getBlueToothURL() {
@@ -44,7 +50,16 @@ public class AuthorizationRequest implements IAuthorizationRequest{
     //The called URL up until the query stinrg
     @Override
     public String getReturnURL() {
-        return this.CalledUrl.substring(0,this.CalledUrl.indexOf("?"));
+        if(isConnectionPicky) {
+            if(this.CalledUrl.contains("sqrl://")) {
+                return  this.CalledUrl.substring(0, this.CalledUrl.indexOf("?")).replace("sqrl://", "https://");
+            }else if (this.CalledUrl.contains("qrl://")) {
+                return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?")).replace("qrl://", "http://");
+            }
+            return this.CalledUrl;
+        } else {
+            return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?"));
+        }
     }
 
     @Override
@@ -154,7 +169,10 @@ public class AuthorizationRequest implements IAuthorizationRequest{
         if (matchRegular.group(1).toLowerCase().startsWith("sqrl")) {
             this.isSecure = true;
             this.webProtocol = "https";
-        } else if (matchRegular.group(1).toLowerCase().startsWith("https")) {
+        }else if (matchRegular.group(1).toLowerCase().startsWith("qrl")) {
+            this.isSecure = false;
+            this.webProtocol = "http";
+        }else if (matchRegular.group(1).toLowerCase().startsWith("https")) {
             this.isSecure = true;
             this.webProtocol = "https";
         } else if (!matchRegular.group(1).toLowerCase().startsWith("http")) {

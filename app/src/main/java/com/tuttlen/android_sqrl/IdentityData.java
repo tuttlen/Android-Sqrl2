@@ -29,11 +29,23 @@ public class IdentityData implements Serializable{
     public boolean checked;
     public String mimeType;
     public byte[] idContents;
+    //public SqrlData sqrlIdentity;
+
+    //TODO due to the sensitive nature of this item we should put this in a accessor and guard it also needs to be cleared when timeout occurs.
+    //TODO Need to reencrypt this with hint password x amount of time after initial login
+    public byte[] unecryptedMasterKey;
+
     public IdentityData(String name, String id, String MimeType, boolean selected) {
         this.name =name;
         this.Id = id;
         this.checked =selected;
         this.mimeType =MimeType;
+    }
+
+    public byte[] getMasterKey()
+    {
+        //TODO Need to reencrypt this with hint password x amount of time after initial login
+        return this.unecryptedMasterKey;
     }
 
     public static IdentityData selectIdentity(ArrayList<IdentityData> items, String user) {

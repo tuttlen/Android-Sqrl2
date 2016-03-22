@@ -16,6 +16,9 @@ import java.security.GeneralSecurityException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import eu.artemisc.stodium.Ed25519;
+import eu.artemisc.stodium.GenericHash;
+import eu.artemisc.stodium.RandomBytes;
 import eu.artemisc.stodium.Stodium;
 
 /**
@@ -66,13 +69,13 @@ public class Helper {
     }
 
     public static byte[] urlDecode(String target) {
-        target = target.replace("+", "/").replace("_", "-");
-        return Base64.decode(target, Base64.DEFAULT| Base64.NO_WRAP);
+        target = target.replace("-", "+").replace("_", "/");
+        return Base64.decode(target, Base64.DEFAULT | Base64.NO_WRAP);
     }
 
     public static String urlEncode(byte[] target) {
         String base64 = Base64.encodeToString(target, Base64.DEFAULT| Base64.NO_WRAP);
-        return base64.replace("/", "+").replace("-", "_").replace("=","");
+        return base64.replace("/", "_").replace("+", "-").replace("=", "");
 
     }
 
@@ -127,8 +130,12 @@ public class Helper {
     {
         byte[] messageBytes = domain.getBytes();
         byte[] out = new byte[32];
+        byte[] publicKey = new byte[32];
+        byte[] privatekey = new byte[64];
+
         Sodium.crypto_auth_hmacsha256(out, messageBytes, messageBytes.length, key);
-        return out;
+        Sodium.crypto_sign_seed_keypair(publicKey,privatekey,out);
+        return privatekey;
     }
 
     public static byte[] CreateRandom(int length) {
@@ -139,14 +146,33 @@ public class Helper {
 
     public static byte[] PublicKeyFromPrivateKey(byte[] privateKey) {
         byte[] publicKey = new byte[32];
-        Sodium.crypto_sign_ed25519_sk_to_pk(publicKey,privateKey);
+        Ed25519.publicFromPrivate(publicKey, privateKey);
         return publicKey;
     }
 
     public static byte[] Sign(byte[] message, byte[] privateKey) {
-        byte[] signedMessage = new byte[64];
-        Sodium.crypto_sign_ed25519(signedMessage,new int[]{message.length},message,message.length,privateKey);
-        return signedMessage;
+        //A bug fixed by creating a signed message that is already 64 bytes larger then message
+        byte[] signatureSignedMessage = new byte[64+message.length];
+        byte[] signature = new byte[Ed25519.SIGNBYTES];
+
+        //yuk we have to copy out the reuslt
+        int size = Ed25519.signDetached(signature, message, privateKey);
+        return signature;
+    }
+
+    public static byte[] CreatePrivateKeyFromSeed(byte[] random)
+    {
+        byte[] privateKey = new byte[64];
+        byte[] publicKey = new byte[32];
+        Ed25519.keypairSeed(publicKey,privateKey,random);
+        return privateKey;
+    }
+
+
+
+    public static boolean Verify(byte[] sMessage,byte[] message,  byte[] publicKey)
+    {
+        return Ed25519.verifyDetached(sMessage,message,publicKey);
     }
 
     public static byte[] SHA256(byte[] value)

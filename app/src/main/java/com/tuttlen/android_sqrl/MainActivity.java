@@ -1,6 +1,7 @@
 package com.tuttlen.android_sqrl;
 
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
@@ -21,25 +22,46 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.api.client.googleapis.auth.clientlogin.ClientLogin;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPostHC4;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpParams;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -52,7 +74,7 @@ public class MainActivity extends Activity {
     private Button confbutton = null;
     private Button scanButton = null;
     private Button exportKey =null;
-    private static authRequest authReq = null; // Contains all the info for the web page you are trying to authenticate with
+    private static AuthorizationRequest authReq = null; // Contains all the info for the web page you are trying to authenticate with
     private static identity current_identity = null; // The currently logged in identity
     private static IdentityData current_sqrl_identity = null; // The currently logged in identity
 
@@ -97,7 +119,7 @@ public class MainActivity extends Activity {
                 publicKeyText.setText("Please wait this will take time");
                 confbutton.setEnabled(false);
 
-                if(!authReq.isBlueTooth) {
+                if(!authReq.isValidBluetooth) {
                     new createSignature().execute(authReq.getURL());
                 } else {
                     new createSignature().execute(authReq.getBlueToothURL());
@@ -275,12 +297,7 @@ public class MainActivity extends Activity {
         {
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             scanned =  result.getContents();
-            try {
-                authReq = new authRequest(scanned);
-            } catch (URISyntaxException e)
-            {
-
-            }
+            authReq = new AuthorizationRequest(scanned);
             confbutton.setEnabled(true);
             textView1.setText("Authenticate to " + authReq.getDomain());
         }
@@ -295,52 +312,58 @@ public class MainActivity extends Activity {
     private class createSignature extends AsyncTask<String, Void, String[]> {
         @Override
         protected String[] doInBackground(String... params) {
-            String URL = params[0];
-            byte[] privateKey = Helper.CreatePrivateKey(authReq.getDomain(), current_identity.getMasterKey());
-
-            byte[] publicKey=null;
-            byte[] signature=null;
-
             try {
-                publicKey = Helper.PublicKeyFromPrivateKey(privateKey);
-                signature = Helper.Sign(URL.getBytes(), privateKey);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+                String URL = params[0];
+                byte[] privateKey = Helper.CreatePrivateHMAC(authReq.getDomain(), current_sqrl_identity.getMasterKey());
 
-            String publicKey_s = Helper.urlEncode(publicKey);
-            String sign_s = Helper.urlEncode(signature);
-            //It's either verified or not
-            boolean result = false;
-            if(authReq.isBlueTooth) {
-                //String message, String signature, String publicKey)
-                MessageFormat msgFormat = new MessageFormat("{0}|{1}|{2}");
-                //TODO assert device address we have selected matches
-                String bAddressAndNonce = authReq.getURL();
-                if(ValidateBluetoothAddress(selectedDevice.getAddress(), bAddressAndNonce)) {
-                    //TODO need to refactor this to return boolean of validation also this function should return an object
-                    String results = RunFindService_client(msgFormat.format(new Object[]{bAddressAndNonce, sign_s, publicKey_s}), true);
-                    results = results.split(":")[0]; //TODO thrownaway the result for now but we may use later
-                    if(results == "y") {
-                        result = true;
-                    } else {
-                        result = false;
-                    }
-                } else {
-                    //for bluetooth this is somewhat important if we want to send or receive passwords
-                    Toast.makeText(getApplicationContext(), "Receiver does not match! Please select the right recipient.",
-                            Toast.LENGTH_LONG).show(); // show the user
-                    result = false;
+                byte[] publicKey = null;
+                byte[] signature = null;
+
+                try {
+                    publicKey = Helper.PublicKeyFromPrivateKey(privateKey);
+                    signature = Helper.Sign(authReq.CalledUrl.getBytes(), privateKey);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-            } else {
-                result =web_post(authReq.getReturnURL(), authReq.getURL(), sign_s, publicKey_s);
+                String publicKey_s = Helper.urlEncode(publicKey);
+                String sign_s = Helper.urlEncode(signature);
+                //It's either verified or not
+                boolean result = false;
+                if (authReq.isValidBluetooth) {
+                    //String message, String signature, String publicKey)
+                    MessageFormat msgFormat = new MessageFormat("{0}|{1}|{2}");
+                    //TODO assert device address we have selected matches
+                    String bAddressAndNonce = authReq.getURL();
+                    if (ValidateBluetoothAddress(selectedDevice.getAddress(), bAddressAndNonce)) {
+                        //TODO need to refactor this to return boolean of validation also this function should return an object
+                        String results = RunFindService_client(msgFormat.format(new Object[]{bAddressAndNonce, sign_s, publicKey_s}), true);
+                        results = results.split(":")[0]; //TODO thrownaway the result for now but we may use later
+                        if (results == "y") {
+                            result = true;
+                        } else {
+                            result = false;
+                        }
+                    } else {
+                        //for bluetooth this is somewhat important if we want to send or receive passwords
+                        Toast.makeText(getApplicationContext(), "Receiver does not match! Please select the right recipient.",
+                                Toast.LENGTH_LONG).show(); // show the user
+                        result = false;
+                    }
+
+                } else {
+                    result = web_post3(authReq.CalledUrl, authReq.getURL(), sign_s, publicKey_s, privateKey);
+                }
+                if (result) {
+                    return new String[]{publicKey_s, sign_s, "Verified"};
+                } else {
+                    return new String[]{publicKey_s, sign_s, "Failed"};
+                }
+            } catch(SecurityException e)
+            {
+                Toast.makeText(getApplicationContext(),"SecuritException",Toast.LENGTH_LONG);
             }
-            if(result) {
-                return new String[]{publicKey_s, sign_s, "Verified"};
-            } else {
-                return new String[]{publicKey_s, sign_s, "Failed"};
-            }
+            return new String[]{"", "", "Failed"};
         }
 
         private boolean ValidateBluetoothAddress(String address, String bAddressAndNonce) {
@@ -375,13 +398,99 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    public boolean web_post3(String URL, String message, String signature, String publicKey, byte [] sK)
+    {
+        try
+        {
+            HttpClient httpClient = new DefaultHttpClient();
+            httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("sqrl", SSLSocketFactory.getSocketFactory(), 443));
+            HttpPost httppost = new HttpPost(URL);
+            String client = String.format("ver=%s\ncmd=%s\nidk=%s",1,"login",publicKey);
+            String ids = signature;
+
+            httppost.addHeader("User-Agent","SQRL/1");
+            httppost.addHeader("Content-type","application/x-www-form-urlencoded");
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+            client = Helper.urlEncode(client.getBytes());
+            String server = Helper.urlEncode(URL.getBytes());
+            String signature2 = client+server;
+            nameValuePairs.add(new BasicNameValuePair("client",client));
+            nameValuePairs.add(new BasicNameValuePair("server",server));
+            nameValuePairs.add(new BasicNameValuePair("ids",Helper.urlEncode(Helper.Sign(signature2.getBytes(),sK))));
+            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+
+            HttpResponse response = httpClient.execute(httppost); // Execute HTTP Post Request
+
+            int status = response.getStatusLine().getStatusCode();
+
+            if (status == HttpStatus.SC_OK) {
+                ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+                response.getEntity().writeTo(ostream);
+
+                String out = ostream.toString();
+                Log.v("web", out);
+                // See if the page returned "Verified"
+                //if (out.contains("Verified")) {
+                //    return true; // return true if verified
+                // }
+                //according to spec if we have a status of OK that means it worked any other and it fails,
+                //TODO I am not sure if other 200 class codes are also acceptable
+                return true;
+            }  else {Log.v("web", "Connection not ok");}
+        } catch (ClientProtocolException e) {
+            Log.e("web", "error");
+            //Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Log.e("web", "error");
+            //Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
+        return false; // Return false if query did not return verification
+
+
+    }
+
+    private boolean web_post(String URL, String message, String signature, String publicKey)
+    {
+        try {
+            String client = String.format("ver=%s\ncmd=%s\nidk=%s\n", 1, "login", publicKey);
+            String server = String.format("%s", URL);
+            String ids = signature;
+            client = String.format("client=%s&",Helper.urlEncode(client.getBytes()));
+            server = String.format("server=%s&",Helper.urlEncode(server.getBytes()));
+            ids = String.format("ids=%s",signature);
+            java.net.URL openUrl = new java.net.URL(URL);
+            HttpURLConnection urlConnection = (HttpURLConnection) openUrl.openConnection();
+            urlConnection.setDoOutput(true);
+            urlConnection.setChunkedStreamingMode(0);
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            urlConnection.setRequestProperty("User-Agent","SQRL/1");
+            int length = client.getBytes().length+server.getBytes().length+ids.getBytes().length;
+            urlConnection.setRequestProperty("Content-Length", "" + Integer.toString(length));
+            urlConnection.setRequestProperty("Content-Language", "en-US");
+
+            OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
+
+            out.write(client.getBytes());
+            out.write(server.getBytes());
+            out.write(ids.getBytes());
+            int code = urlConnection.getResponseCode();
+            String respMesage = urlConnection.getResponseMessage();
+        } catch(IOException e) {
+            Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_LONG);
+        }
+
+        return true;
+    }
     // Send signature and pubkey to server
-    private boolean web_post(String URL, String message, String signature, String publicKey) {
-
-
+    private boolean web_post2(String URL, String message, String signature, String publicKey) throws MalformedURLException
+    {
         HttpClientBuilder builder;
         HttpPostHC4 httppost;
         CloseableHttpClient httpClient;
+
 
         try
         {
@@ -390,9 +499,16 @@ public class MainActivity extends Activity {
             httpClient = builder.build();
             httppost = new HttpPostHC4(URL);
 
-            httppost.addHeader("message",message);
-            httppost.addHeader("signature",signature);
-            httppost.addHeader("publicKey",publicKey);
+            //httppost.addHeader("message",message);
+            //httppost.addHeader("signature",signature);
+            //httppost.addHeader("publicKey",publicKey);
+            String client = String.format("ver=%s\ncmd=%s\nidk=%s",1,"login",publicKey);
+            String server = String.format("%s",URL);
+            String ids = signature;
+            httppost.addHeader("client",Helper.urlEncode(client.getBytes()));
+            httppost.addHeader("server",Helper.urlEncode(server.getBytes()));
+            httppost.addHeader("ids",ids);
+
             CloseableHttpResponse response = httpClient.execute(httppost); // Execute HTTP Post Request
 
             int status = response.getStatusLine().getStatusCode();

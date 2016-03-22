@@ -82,7 +82,7 @@ public class LoginActivity extends Activity {
                         public void run() {
                             try {
                                 byte[] scryptResult = Helper.PK(pass.getBytes(), data.sqrlStorage.ScryptSalt, data.sqrlStorage.ScryptIteration, new byte[]{}, 1 << data.sqrlStorage.nFactor, runthis);
-                                //System.arraycopy(scryptResult,0,keyresult,0,keyresult.length);
+
                                 String result_uIDMK = aesCrypto.doDecryption(scryptResult, data.sqrlStorage.IV, data.aad, data.sqrlStorage.tag, data.sqrlStorage.IDMK);
 
                                 if (!Helper.determineAuth(result_uIDMK) && false) { //for debug purposes
@@ -90,6 +90,8 @@ public class LoginActivity extends Activity {
                                 }
                                 else
                                 {
+                                    //id.sqrlIdentity =data;
+                                    id.unecryptedMasterKey = Helper.hexStringToByteArray(result_uIDMK);
                                     // Send object back to parent
                                     Intent output = new Intent();
                                     output.putExtra("sqrlid",id);
