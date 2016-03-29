@@ -74,6 +74,7 @@ public class MainActivity extends Activity {
     private Button confbutton = null;
     private Button scanButton = null;
     private Button exportKey =null;
+    private Button btnLogout =null;
     private static AuthorizationRequest authReq = null; // Contains all the info for the web page you are trying to authenticate with
     private static identity current_identity = null; // The currently logged in identity
     private static IdentityData current_sqrl_identity = null; // The currently logged in identity
@@ -89,8 +90,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+
+        //TODO move out BT to another activity this activity will be split into the handling activity and there will be two new identities btooth and IPC
         listOfBT = (ListView) findViewById(R.id.listView);
         textView1 = (TextView) findViewById(R.id.textView1);
         publicKeyText = (EditText) findViewById(R.id.publicKeyText);
@@ -99,6 +100,7 @@ public class MainActivity extends Activity {
         exportKey = (Button) findViewById(R.id.exportPublicKeys);
         confbutton = (Button) findViewById(R.id.confbutton);
         scanButton = (Button) findViewById(R.id.scan);
+        btnLogout = (Button) findViewById(R.id.btnLogout);
         bAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if(authReq == null) {
@@ -109,6 +111,17 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 
                 ScanQrcCode();
+
+            }
+        });
+
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                current_sqrl_identity.Clear();
+                Intent loginAct = new Intent(MainActivity.this, LoginActivity.class);
+                startActivityForResult(loginAct, 54321);
 
             }
         });
@@ -297,6 +310,7 @@ public class MainActivity extends Activity {
         {
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             scanned =  result.getContents();
+            //TODO this is where we will determine the activity for btooth
             authReq = new AuthorizationRequest(scanned);
             confbutton.setEnabled(true);
             textView1.setText("Authenticate to " + authReq.getDomain());
@@ -352,7 +366,8 @@ public class MainActivity extends Activity {
                     }
 
                 } else {
-                    result = web_post3(authReq.CalledUrl, authReq.getURL(), sign_s, publicKey_s, privateKey);
+                    authReq.isConnectionPicky=true;
+                    result = web_post3(authReq.getReturnURL(), authReq.getURL(), sign_s, publicKey_s, privateKey);
                 }
                 if (result) {
                     return new String[]{publicKey_s, sign_s, "Verified"};

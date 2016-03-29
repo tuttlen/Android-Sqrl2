@@ -52,9 +52,6 @@ public class LoginActivity extends Activity {
                 final String pass = passEdit.getText().toString();
                 final IdentityData id = IdentityData.selectIdentity(userIdentities,user);
 
-                //TODO We use the provided password to pass through scrypt with the known scrypt salt.
-                //this will derive the key and with this key we decrypt and authenticate the data in the sqrl data
-                //packet. I am not sure what value we can authenticate to.
                 try {
                     final SqrlData data = IdentityData.LoadSqrlData(id);
                     final ProgressDialog pDialog = new ProgressDialog(v.getContext());
@@ -71,10 +68,6 @@ public class LoginActivity extends Activity {
                             return true;
                         }
                     };
-
-
-                    //byte[]  keyresult = Helper.PK(pass.getBytes(),data.sqrlStorage.ScryptSalt,data.sqrlStorage.ScryptIteration,new byte[]{},1 <<data.sqrlStorage.nFactor, runthis);
-                    //for debug purposes
 
                     final byte[]  keyresult = new byte[32];
                     Thread runScrypt = new Thread() {
@@ -169,8 +162,17 @@ public class LoginActivity extends Activity {
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         username.setAdapter(dataAdapter);
     }
+
     // adds items to username list (spinner)
     public void addUsersToSpinner(ArrayList<IdentityData> id) {
+
+        if(id == null || id.size() == 0)
+        {
+            Intent a = new Intent(LoginActivity.this, newuserActivity.class);
+            startActivity(a);
+
+        }
+
         for(IdentityData item : id) {
             users.add(item.name);
         }

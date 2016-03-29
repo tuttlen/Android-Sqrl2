@@ -115,6 +115,8 @@ public class GoogleDriveActivity extends Activity {
                 newTask.execute();
             }
         });
+        activityLayout.addView(btnAddIds);
+
         btnCancelIds = new Button(this);
         btnCancelIds.setLayoutParams(tlp);
         btnCancelIds.setEnabled(true);
@@ -127,7 +129,7 @@ public class GoogleDriveActivity extends Activity {
                                             }
                                         }
         );
-        activityLayout.addView(btnAddIds);
+        activityLayout.addView(btnCancelIds);
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("Calling Drive API ...");

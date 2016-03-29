@@ -55,6 +55,16 @@ public class ExampleTest extends InstrumentationTestCase {
         assertEquals("sqrl://example.com/sqrl",req.getReturnURL());
     }
 
+    public void testAuth3_wqithsqrl_picky() throws Exception{
+
+        AuthorizationRequest req = new AuthorizationRequest("sqrl://example.com/sqrl?4095c8adfa51dabe30fe9f9474d3f91def620300e489e6853baa67bed5d5e0d4");
+        String testReuslt = req.getDomain();
+        assertEquals("example.com",testReuslt);
+        //if we understand how to construct a sqrl then we should expect to understand how to handle the protocol
+        req.isConnectionPicky=true;
+        assertEquals("https://example.com/sqrl",req.getReturnURL());
+    }
+
     public void testAuth3_nonce() throws Exception{
 
         AuthorizationRequest req = new AuthorizationRequest("sqrl://example.com/sqrl?4095c8adfa51dabe30fe9f9474d3f91def620300e489e6853baa67bed5d5e0d4");
@@ -128,7 +138,7 @@ public class ExampleTest extends InstrumentationTestCase {
     {
         String properBtooth ="B1:B1:0D:B3:10:30:00:00";
         AuthorizationRequest req = new AuthorizationRequest("B1:B1:0D:B3:10:30:00:00/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
-        assertTrue("Is proper Bluetooth address",req.isValidBluetooth);
+        assertTrue("Is proper Bluetooth address", req.isValidBluetooth);
         assertEquals("B1:B1:0D:B3:10:30:00:00",req.getURL());
     }
 
@@ -145,6 +155,18 @@ public class ExampleTest extends InstrumentationTestCase {
         String imProperBtooth ="B1:B1:0D:B3:10:30:00:00:00";
         AuthorizationRequest req = new AuthorizationRequest("B1:B1:0D:B3:10:30:00:00:00/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
         assertFalse(req.isValidBluetooth);
+    }
+
+    public void testQRlAddress()
+    {
+        //qrl://10.0.0.27/login/sqrlauth.php?nut=5f7d471e26450c1539fe73b7867a789abb0c7de6f4246f1e719d7b2830e73de2
+        String qrlAddress ="qrl://10.0.0.27/login/sqrlauth.php?nut=5f7d471e26450c1539fe73b7867a789abb0c7de6f4246f1e719d7b2830e73de2";
+        AuthorizationRequest req = new AuthorizationRequest(qrlAddress);
+        assertEquals(true, req.isValid);
+        assertEquals("10.0.0.27",req.domain);
+        assertEquals("5f7d471e26450c1539fe73b7867a789abb0c7de6f4246f1e719d7b2830e73de2",req.getNonce());
+        assertTrue(req.getReturnURL().startsWith("http"));
+
     }
 
     public void test_NewAuthRequest() throws Exception
@@ -351,6 +373,64 @@ public class ExampleTest extends InstrumentationTestCase {
 
     }
 
+
+    /*
+        Trying different combinations of pk parameters to get packet to decrypt properly
+     */
+    public void testEncryptAADUnencrypt_1() throws JSONException ,IOException, GeneralSecurityException
+    {
+        AESGCMJni4 crypto = new AESGCMJni4();
+        String password= "tttttttttttttttttttttttt";
+
+        String sqrlData ="SQRLDATAnQABAC0AjAIFnNpAdZDUjrMFYgB9yEeKaTObYRtwRtaIeglVAAAA8QAEBQ8AZKlrEUYZ1CxIBjW-pRpmbCY3P4H9v99j16WrXI262DFZIP4kMGhqK7N05g6gQzcQdgiD72cqj5qHmKiiP88Thf0RSJD6aAvRcP3XNdpSglh4l1Fb-1nb-A4TiH3Tk0zR0bE0ZcqhUaj4M4ILu86KmEkAAgAqponTFyavyjhYUCECOHqSCU0AAAAt_s6hM4nMEk4xdmyQmd1Juojslag8I6cVb2ma4B3CpIBlLnDCVd066kaB9GjptRE";
+        String sqrlBase = sqrlData.substring(8);
+        byte[] hexResult = Helper.urlDecode(sqrlBase);
+
+        SqrlData parsed = SqrlData.ExtractSqrlData(hexResult);
+
+        String sixteenZeros ="00000000000000000000000000000000";
+        String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
+
+        String decryptResult = crypto.doDecryption(AESGCMJni4.hexStringToByteArray(scrpytPassword),
+                parsed.sqrlStorage.IV,
+                parsed.aad,
+                parsed.sqrlStorage.tag,
+                parsed.sqrlStorage.IDMK);
+
+        android.util.Log.d("test", String.format("ResultDecryption: %s", decryptResult));
+        assertFalse(Helper.determineAuth(decryptResult));
+
+        byte[] anotherResult = Helper.PK(password.getBytes(),
+                Helper.hexStringToByteArray(sixteenZeros+Helper.bytesToHex(parsed.sqrlStorage.ScryptSalt)),
+                parsed.sqrlStorage.ScryptIteration,
+                new byte[]{},
+                1 << parsed.sqrlStorage.nFactor);
+
+        decryptResult = crypto.doDecryption(anotherResult,
+                parsed.sqrlStorage.IV,
+                parsed.aad,
+                parsed.sqrlStorage.tag,
+                parsed.sqrlStorage.IDMK);
+
+        android.util.Log.d("test", String.format("ResultDecryption: %s", decryptResult));
+        assertFalse(Helper.determineAuth(decryptResult));
+
+        anotherResult = Helper.PK(password.getBytes(),
+                Helper.hexStringToByteArray(Helper.bytesToHex(parsed.sqrlStorage.ScryptSalt)+sixteenZeros),
+                parsed.sqrlStorage.ScryptIteration,
+                new byte[]{},
+                1 << parsed.sqrlStorage.nFactor);
+
+        decryptResult = crypto.doDecryption(anotherResult,
+                parsed.sqrlStorage.IV,
+                parsed.aad,
+                parsed.sqrlStorage.tag,
+                parsed.sqrlStorage.IDMK);
+
+        android.util.Log.d("test", String.format("ResultDecryption: %s", decryptResult));
+        assertFalse(Helper.determineAuth(decryptResult));
+    }
+
     public void testByteUnPackSQRLData_Unencrypt() throws IOException,GeneralSecurityException
     {
         String password= "tttttttttttttttttttttttt";
@@ -391,6 +471,10 @@ public class ExampleTest extends InstrumentationTestCase {
         android.util.Log.d("test", String.format("ResultDecryption: %s", result));
 
         assertEquals(scrpytPassword, Helper.bytesToHex(scrypekey));
+
+
+        //This test  will fail because we still haven't fully understood how to decode a SQRL packet yet :(
+        assertTrue(Helper.determineAuth(result));
 
     }
 
@@ -434,7 +518,7 @@ public class ExampleTest extends InstrumentationTestCase {
         String current = Helper.bytesToHex(crypto.sha256(randomKey));
         String sodium2 = Helper.bytesToHex(Helper.SHA256(randomKey));
 
-        assertEquals(current,sodium2);
+        assertEquals(current, sodium2);
 
     }
     /*

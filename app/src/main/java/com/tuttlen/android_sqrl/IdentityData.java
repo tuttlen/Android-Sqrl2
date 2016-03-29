@@ -117,4 +117,10 @@ public class IdentityData implements Serializable{
         return readSqrlDataBlocks;
     }
 
+    public void Clear() {
+        for (int i = 0; i < 100; i++) {
+            this.unecryptedMasterKey = Helper.CreateRandom(32);
+        }
+        this.unecryptedMasterKey = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    }
 }

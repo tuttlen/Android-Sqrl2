@@ -18,7 +18,7 @@ public class AuthorizationRequest implements IAuthorizationRequest{
     //This is formatted without colons
     protected  String bluetoothAddress ="";
     protected  boolean isSecure = false;
-    protected Pattern regSQRLPattern = Pattern.compile("(http|https|sqrl):\\/\\/(.*?)\\/(.*)");
+    protected Pattern regSQRLPattern = Pattern.compile("(http|https|sqrl|qrl):\\/\\/(.*?)\\/(.*)");
     protected Pattern bToothSQRLPattern  = Pattern.compile("(([0-9A-Fa-f]{2}[:-])+([0-9A-Fa-f]{2}))");
     protected  boolean isConnectionPicky =true;
 
@@ -126,6 +126,7 @@ public class AuthorizationRequest implements IAuthorizationRequest{
         //if both are invalid then try again by adding http://
         if(!this.isValid && !this.isValidBluetooth)
         {
+            //TODO Fix this might jsut remove it makes little sense to be this forgiving.
             //try one more time by adding a protocol prefix.
             //TODO decide whether we need to trim off any leading backslashes
             String newUrl = "http://"+ this.CalledUrl;

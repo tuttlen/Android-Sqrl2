@@ -103,16 +103,6 @@ public class Helper {
         }
     }
 
-    public static boolean determineAuth(String authString)
-    {
-        byte[] unEncode = Helper.hexStringToByteArray(authString);
-        int result = 0;
-        for (int i = 0; i < unEncode.length; i++) {
-            result += unEncode[i];
-        }
-        return result > 0;
-    }
-
     // Create the private key from URL and secret key
     public static byte[] CreatePrivateKey(String domain, byte[] key) {
         byte[] hmac = null;
@@ -180,5 +170,16 @@ public class Helper {
         byte[] outHash = new byte[32];
         Sodium.crypto_hash_sha256(outHash,value,32);
         return  outHash;
+    }
+
+    public static boolean determineAuth(String result) {
+        byte[] hexResult = Helper.hexStringToByteArray(result);
+        byte orredResult =0;
+
+        for (int i = 0; i < hexResult.length; i++) {
+            orredResult |= hexResult[i];
+        }
+
+        return orredResult >0;
     }
 }
