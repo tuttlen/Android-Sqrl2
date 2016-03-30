@@ -174,12 +174,12 @@ public class Helper {
 
     public static boolean determineAuth(String result) {
         byte[] hexResult = Helper.hexStringToByteArray(result);
-        byte orredResult =0;
+        int orredByte =0;
 
         for (int i = 0; i < hexResult.length; i++) {
-            orredResult |= hexResult[i];
+            orredByte |= hexResult[i];
         }
 
-        return orredResult >0;
+        return orredByte >0;
     }
 }

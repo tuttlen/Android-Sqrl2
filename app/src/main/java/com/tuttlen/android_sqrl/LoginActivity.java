@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -76,7 +75,7 @@ public class LoginActivity extends Activity {
                             try {
                                 byte[] scryptResult = Helper.PK(pass.getBytes(), data.sqrlStorage.ScryptSalt, data.sqrlStorage.ScryptIteration, new byte[]{}, 1 << data.sqrlStorage.nFactor, runthis);
 
-                                String result_uIDMK = aesCrypto.doDecryption(scryptResult, data.sqrlStorage.IV, data.aad, data.sqrlStorage.tag, data.sqrlStorage.IDMK);
+                                String result_uIDMK = aesCrypto.doDecryption(scryptResult, data.sqrlStorage.IV, data.type1aad, data.sqrlStorage.tag, data.sqrlStorage.IDMK);
 
                                 if (!Helper.determineAuth(result_uIDMK) && false) { //for debug purposes
                                     Toast.makeText(getApplicationContext(), "Wrong password", Toast.LENGTH_LONG).show();

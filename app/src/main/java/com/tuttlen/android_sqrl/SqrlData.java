@@ -14,7 +14,9 @@ import java.io.IOException;
  * Created by nathan tuttle on 3/9/16.
  */
 public class SqrlData {
-    public byte [] aad;
+    public byte [] type1aad;
+    public byte [] type2aad;
+    public byte [] type3aad;
     public type1 sqrlStorage;
     public type2 type2SqrlData;
     public type3 type3SqrlData;
@@ -67,10 +69,10 @@ public class SqrlData {
     {
         SqrlData dataHolder = new SqrlData();
         type1 type1sqrlData = JBBPParser.prepare("<short Entire_length; <short Initial_type; <short PT_length; byte[12] IV; byte[16] ScryptSalt; byte nFactor; <int ScryptIteration; byte[2] Options; byte HintLength; byte PWVerifySeconds; byte[2] Timeout; byte[32] IDMK; byte[32] IDLK; byte[16] tag;").parse(hex).mapTo(type1.class);
-        JBBPParser parseAAD = JBBPParser.prepare("byte[" + type1sqrlData.PT_length + "] aad;");
+        JBBPParser parseAAD = JBBPParser.prepare("byte[" + type1sqrlData.PT_length + "] type1aad;");
         JBBPFieldStruct result = parseAAD.parse(hex);
-        byte[] parsedaad = result.findFieldForNameAndType("aad", JBBPFieldArrayByte.class).getArray();
-        dataHolder.aad =parsedaad;
+        byte[] parsedaad = result.findFieldForNameAndType("type1aad", JBBPFieldArrayByte.class).getArray();
+        dataHolder.type1aad =parsedaad;
         dataHolder.sqrlStorage = type1sqrlData;
         int endLength = type1sqrlData.Entire_length;
         dataHolder = getNextType(dataHolder,endLength,hex);
@@ -90,12 +92,20 @@ public class SqrlData {
             if(nextType.TypeCode == 2)
             {
                 dataHolder.type2SqrlData = JBBPParser.prepare("<short Length; <short TypeCode;  byte[16] ScryptSalt; byte nFactor; <int ScryptIteration; byte[32] IDUK; byte[16] tag;").parse(nextHex).mapTo(type2.class);
+                JBBPParser parseAAD = JBBPParser.prepare("byte[25] type2aad;");
+                JBBPFieldStruct result = parseAAD.parse(nextHex);
+                byte[] parsedaad = result.findFieldForNameAndType("type2aad", JBBPFieldArrayByte.class).getArray();
+                dataHolder.type2aad =parsedaad;
                 dataHolder = getNextType(dataHolder,dataHolder.type2SqrlData.Length,nextHex);
             }
 
             if(nextType.TypeCode == 3)
             {
                 dataHolder.type3SqrlData = JBBPParser.prepare("<short Length; <short TypeCode; byte[32] encryptedpIUK; byte[32] encryptedNOIUK; byte[32] encryptedNNOIUK; byte[32] encryptedOPIUK; byte[16] tag;").parse(nextHex).mapTo(type3.class);
+                JBBPParser parseAAD = JBBPParser.prepare("byte[4] type3aad;");
+                JBBPFieldStruct result = parseAAD.parse(nextHex);
+                byte[] parsedaad = result.findFieldForNameAndType("type3aad", JBBPFieldArrayByte.class).getArray();
+                dataHolder.type3aad =parsedaad;
                 dataHolder = getNextType(dataHolder,dataHolder.type3SqrlData.Length,nextHex);
             }
 
