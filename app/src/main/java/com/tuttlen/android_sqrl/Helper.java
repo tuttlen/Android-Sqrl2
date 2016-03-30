@@ -116,6 +116,24 @@ public class Helper {
         return hmac;
     }
 
+    public static byte[] EnHash(byte[] password, int iterations)
+    {
+        byte[] xorresult = new byte[]{};
+        byte[] nextResult = new byte[]{};
+        byte[] result = Helper.SHA256(password);
+        for (int i = 0; i < iterations ; i++) {
+            nextResult = Helper.SHA256(result);
+            if(xorresult.length ==0)
+            {
+                xorresult = Helper.massXOR(result,nextResult);
+            } else {
+                xorresult = Helper.massXOR(nextResult,xorresult);
+            }
+            result=nextResult;
+        }
+        return Helper.massXOR(nextResult,xorresult);
+    }
+
     public static byte[] CreatePrivateHMAC(String domain, byte[] key)
     {
         byte[] messageBytes = domain.getBytes();
