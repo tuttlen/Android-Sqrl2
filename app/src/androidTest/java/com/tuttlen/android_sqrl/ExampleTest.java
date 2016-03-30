@@ -289,6 +289,95 @@ public class ExampleTest extends InstrumentationTestCase {
 
     }
 
+    //https://www.grc.com/x/news.exe?cmd=article&group=grc.sqrl&item=12636&utag=
+    public void testSqrlData2_adam() throws IOException,GeneralSecurityException
+    {
+        AESGCMJni4 crypto = new AESGCMJni4();
+        String thePass ="the password";
+        String sqrlData ="SQRLDATAfQABAC0Abouu7IvEI_1qknlaakonT7Lm4PWRwle2tKfXMQkEAAAA8QAE" +
+                "AQ8Au7C0-pN8wxqzf-Qx0XUTZMXq3dS7brDwEaBTdwqsRkKi-mE_mV9UVHCe6sj1" +
+                "kMTYrqPsDNflap_jD_K5-8_dMPLoB0pnbp9MqPXuzlXEe5dJAAIAUWdkk7EVnS3B" +
+                "wXMVJkUU7AnoAAAA6bvMz939Yf_CkJTcd7tPg9qecHjC5n4tcnjO1PP5yqpEHr9C" +
+                "7SxCZ0cQ-UcdhAVmlAADAKz22QR9avOQMyOEJ3V6G_f3uhLgtg-T3_DNONeWVlI7" +
+                "PZcYwYsY_aDc_ZcpBb4L91Dv5xBtPgN2owc93O9OlSr0Rhs8unMNgDy809SomAnl" +
+                "HrTz6oOg6Y-Cz8glP5kRcC8RpTIQugCCr8KkvhzEgydtC4aDMlFn3qqzykp8NkL3" +
+                "QJUPoENfba3N4KZA8jbzpw";
+
+        String sqrlBase = sqrlData.substring(8);
+        byte[] hexResult = Helper.urlDecode(sqrlBase);
+
+        SqrlData parsed = SqrlData.ExtractSqrlData(hexResult);
+
+        String scrpytPassword ="2a1c f64c 099c 8383 357d 11a6 18f9 5299 26c7 79e0 3b41 2043 bf24 3d67 894c 6b33".replace(" ","");
+        assertEquals("6e8baeec8bc423fd6a92795a", Helper.bytesToHex(parsed.sqrlStorage.IV));
+        assertEquals("6a4a274fb2e6e0f591c257b6b4a7d731",Helper.bytesToHex(parsed.sqrlStorage.ScryptSalt));
+        assertEquals(4, parsed.sqrlStorage.ScryptIteration);
+        assertEquals("f2e8 074a 676e 9f4c a8f5 eece 55c4 7b97".replace(" ",""), Helper.bytesToHex(parsed.sqrlStorage.tag));
+        assertEquals("bbb0 b4fa 937c c31a b37f e431 d175 1364c5ea ddd4 bb6e b0f0 11a0 5377 0aac 4642".replace(" ",""),Helper.bytesToHex(parsed.sqrlStorage.IDMK));
+        assertEquals("a2fa 613f 995f 5454 709e eac8 f590 c4d8 aea3 ec0c d7e5 6a9f e30f f2b9 fbcf dd30".replace(" ",""), Helper.bytesToHex(parsed.sqrlStorage.IDLK));
+        byte[] scrypekey = Helper.PK(thePass.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor);
+        assertEquals(scrpytPassword,Helper.bytesToHex(scrypekey));
+        String combinedCipher = Helper.bytesToHex(parsed.sqrlStorage.IDMK)+Helper.bytesToHex(parsed.sqrlStorage.IDLK);
+        String mk =
+                crypto.doDecryption(
+                        scrypekey,
+                        parsed.sqrlStorage.IV,
+                        parsed.aad,
+                        parsed.sqrlStorage.tag,
+                        Helper.hexStringToByteArray(combinedCipher));
+
+        String pt_idmk= "8156 8e9d ab3a 5da2 9633 f9df 4bd3 247b 1d1d 8b55 0850 43cd a707 5d3d 0376 a25d";
+        String pt_idlk ="1e14 8232 c33a 0af5 a5d2 19f3 7004 b696 a898 e8db d585 7456 2ef9 8289 e944 7610";
+        String pt = pt_idmk+pt_idlk;
+        assertEquals(mk,pt.replace(" ",""));
+    }
+
+    public void testByteUnPackSQRLData_forum_adam() throws IOException,GeneralSecurityException
+    {
+        String password= "PASS";
+
+        String sqrlData ="SQRLDATAfQABAC0Abouu7IvEI_1qknlaakonT7Lm4PWRwle2tKfXMQkEAAAA8QAEAQ8Au7C0" +
+                "-pN8wxqzf-Qx0XUTZMXq3dS7brDwEaBTdwqsRkKi-mE_mV9UVHCe6sj1kMTYrqPsDNflap_j" +
+                "D_K5-8_dMPLoB0pnbp9MqPXuzlXEe5dJAAIAUWdkk7EVnS3BwXMVJkUU7AnoAAAA6bvMz939" +
+                "Yf_CkJTcd7tPg9qecHjC5n4tcnjO1PP5yqpEHr9C7SxCZ0cQ-UcdhAVmlAADAKz22QR9avOQ" +
+                "MyOEJ3V6G_f3uhLgtg-T3_DNONeWVlI7PZcYwYsY_aDc_ZcpBb4L91Dv5xBtPgN2owc93O9O" +
+                "lSr0Rhs8unMNgDy809SomAnlHrTz6oOg6Y-Cz8glP5kRcC8RpTIQugCCr8KkvhzEgydtC4aD" +
+                "MlFn3qqzykp8NkL3QJUPoENfba3N4KZA8jbzpw";
+
+        String sqrlBase = sqrlData.substring(8);
+        byte[] hexResult = Helper.urlDecode(sqrlBase);
+
+        SqrlData parsed = SqrlData.ExtractSqrlData(hexResult);
+
+        String scrpytPassword ="5ada4327f5975b10e1667a2b4844576cb85f41a5d16e2163e440cb9bc8d9317a";
+
+        int nfactor  = 512;
+        int iteration = 4;
+        String pIUK = Helper.bytesToHex(parsed.type3SqrlData.encryptedpIUK);
+        String eNOIUK = Helper.bytesToHex(parsed.type3SqrlData.encryptedNOIUK);
+
+        String Identity_MasterKey ="81568e9dab3a5da29633f9df4bd3247b1d1d8b55085043cda7075d3d0376a25d";
+        String Identity_LockKey ="1e148232c33a0af5a5d219f37004b696a898e8dbd58574562ef98289e9447610";
+        String IUK ="beb9f19c8ca4eb1766bcf7c00876faa0dfa060e162284f686098408debdafa6c";
+
+        //assertEquals(Identity_LockKey,Helper.bytesToHex(parsed.sqrlStorage.IDLK));
+        //assertEquals(Identity_MasterKey,Helper.bytesToHex(parsed.sqrlStorage.IDMK));
+
+
+        assertEquals(nfactor, 1 << parsed.sqrlStorage.nFactor);
+        assertEquals(iteration, parsed.sqrlStorage.ScryptIteration);
+
+        android.util.Log.d("test", String.format("Password: %s", Helper.bytesToHex(password.getBytes())));
+        android.util.Log.d("test", String.format("Iterations: %d", parsed.sqrlStorage.ScryptIteration));
+
+        byte[] scrypekey = Helper.PK(password.getBytes(), parsed.sqrlStorage.ScryptSalt, parsed.sqrlStorage.ScryptIteration, new byte[]{}, 1 << parsed.sqrlStorage.nFactor);
+        AESGCMJni4 crypto = new AESGCMJni4();
+        String mk =crypto.doDecryption(scrypekey,parsed.sqrlStorage.IV,parsed.aad, parsed.sqrlStorage.tag,parsed.sqrlStorage.IDMK);
+
+        android.util.Log.d("test", String.format("uIDMK: %s", mk));
+
+    }
+
     public void testBytePackSQRLData() throws IOException,GeneralSecurityException
     {
         String password= "tttttttttttttttttttttttt";
@@ -467,7 +556,8 @@ public class ExampleTest extends InstrumentationTestCase {
         android.util.Log.d("PK", String.format("Result: %s", Helper.bytesToHex(scrypekey)));
 
         AESGCMJni4 crypto = new AESGCMJni4();
-        String result = crypto.doDecryption(scrypekey, parsed.sqrlStorage.IV, parsed.aad, parsed.sqrlStorage.tag, parsed.sqrlStorage.IDMK);
+        String fullPt = Helper.bytesToHex(parsed.sqrlStorage.IDMK) + Helper.bytesToHex(parsed.sqrlStorage.IDLK);
+        String result = crypto.doDecryption(scrypekey, parsed.sqrlStorage.IV, parsed.aad, parsed.sqrlStorage.tag,Helper.hexStringToByteArray( fullPt));
         android.util.Log.d("test", String.format("ResultDecryption: %s", result));
 
         assertEquals(scrpytPassword, Helper.bytesToHex(scrypekey));

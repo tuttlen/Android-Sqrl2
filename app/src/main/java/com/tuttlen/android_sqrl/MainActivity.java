@@ -367,7 +367,7 @@ public class MainActivity extends Activity {
 
                 } else {
                     authReq.isConnectionPicky=true;
-                    result = web_post3(authReq.getReturnURL(), authReq.getURL(), sign_s, publicKey_s, privateKey);
+                    result = web_post3(authReq.CalledUrl, authReq.getURL(), sign_s, publicKey_s, privateKey);
                 }
                 if (result) {
                     return new String[]{publicKey_s, sign_s, "Verified"};
@@ -419,7 +419,7 @@ public class MainActivity extends Activity {
         {
             HttpClient httpClient = new DefaultHttpClient();
             httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("sqrl", SSLSocketFactory.getSocketFactory(), 443));
-            HttpPost httppost = new HttpPost(URL);
+            HttpPost httppost = new HttpPost(authReq.getReturnURL());
             String client = String.format("ver=%s\ncmd=%s\nidk=%s",1,"login",publicKey);
             String ids = signature;
 
