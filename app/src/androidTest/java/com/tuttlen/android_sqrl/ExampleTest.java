@@ -433,6 +433,14 @@ public class ExampleTest extends InstrumentationTestCase {
 
     }
 
+    public void testEnhash()
+    {
+        String expectedEnhash=" 8156 8e9d ab3a 5da2 9633 f9df 4bd3 247b 1d1d 8b55 0850 43cd a707 5d3d 0376 a25d".replace(" ","");
+        String password ="beb9 f19c 8ca4 eb17 66bc f7c0 0876 faa0 dfa0 60e1 6228 4f68 6098 408d ebda fa6c".replace(" ","");
+        byte[] actualHash = Helper.EnHash(Helper.hexStringToByteArray(password),16);
+        assertEquals(expectedEnhash,Helper.bytesToHex(actualHash));
+    }
+
     public void testSQRLData_createSimpleIdentity() throws IOException,GeneralSecurityException,JSONException
     {
         AESGCMJni4 aescrypto = new AESGCMJni4();
