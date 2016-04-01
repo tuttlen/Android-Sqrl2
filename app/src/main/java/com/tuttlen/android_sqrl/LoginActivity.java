@@ -74,16 +74,18 @@ public class LoginActivity extends Activity {
                         public void run() {
                             try {
                                 byte[] scryptResult = Helper.PK(pass.getBytes(), data.sqrlStorage.ScryptSalt, data.sqrlStorage.ScryptIteration, new byte[]{}, 1 << data.sqrlStorage.nFactor, runthis);
+                                //TODO another way to do this that won't take all this manipulation, need to create another extraction element
+                                String ciphertext = Helper.bytesToHex(data.sqrlStorage.IDMK)+Helper.bytesToHex(data.sqrlStorage.IDLK);
+                                String unencryptedResult = aesCrypto.doDecryption(scryptResult, data.sqrlStorage.IV, data.type1aad, data.sqrlStorage.tag, Helper.hexStringToByteArray(ciphertext));
 
-                                String result_uIDMK = aesCrypto.doDecryption(scryptResult, data.sqrlStorage.IV, data.type1aad, data.sqrlStorage.tag, data.sqrlStorage.IDMK);
-
-                                if (!Helper.determineAuth(result_uIDMK) && false) { //for debug purposes
+                                if (!Helper.determineAuth(unencryptedResult) && false) { //for debug purposes
                                     Toast.makeText(getApplicationContext(), "Wrong password", Toast.LENGTH_LONG).show();
                                 }
                                 else
                                 {
                                     //id.sqrlIdentity =data;
-                                    id.unecryptedMasterKey = Helper.hexStringToByteArray(result_uIDMK);
+                                    id.unecryptedMasterKey = Helper.hexStringToByteArray(unencryptedResult.substring(0,64));
+                                    id.identitylockkey = Helper.hexStringToByteArray(unencryptedResult.substring(64,128));
                                     // Send object back to parent
                                     Intent output = new Intent();
                                     output.putExtra("sqrlid",id);

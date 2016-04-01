@@ -366,7 +366,12 @@ public class MainActivity extends Activity {
                     }
 
                 } else {
+                    //the server may or may not handle SQRL schemes this probably should go away because they should expect http(s)
                     authReq.isConnectionPicky=true;
+
+                    //Even though the nut is encoded in the variable some servers expect to see it in the URL as well
+                    authReq.fullNut=true;
+
                     result = web_post3(authReq.CalledUrl, authReq.getURL(), sign_s, publicKey_s, privateKey);
                 }
                 if (result) {
@@ -420,7 +425,7 @@ public class MainActivity extends Activity {
             HttpClient httpClient = new DefaultHttpClient();
             httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("sqrl", SSLSocketFactory.getSocketFactory(), 443));
             HttpPost httppost = new HttpPost(authReq.getReturnURL());
-            String client = String.format("ver=%s\ncmd=%s\nidk=%s",1,"login",publicKey);
+            String client = String.format("ver=%s\ncmd=%s\nidk=%s",1,"ident",publicKey);
             String ids = signature;
 
             httppost.addHeader("User-Agent","SQRL/1");
@@ -452,7 +457,16 @@ public class MainActivity extends Activity {
                 //according to spec if we have a status of OK that means it worked any other and it fails,
                 //TODO I am not sure if other 200 class codes are also acceptable
                 return true;
-            }  else {Log.v("web", "Connection not ok");}
+            }  else
+            {
+                //TODO turn off this logginglog output to
+                ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+                response.getEntity().writeTo(ostream);
+                String out = ostream.toString();
+                //Add a window for verbose transaction watching
+                Log.v("web", out);
+                Log.v("web", "Connection not ok");
+            }
         } catch (ClientProtocolException e) {
             Log.e("web", "error");
             //Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();

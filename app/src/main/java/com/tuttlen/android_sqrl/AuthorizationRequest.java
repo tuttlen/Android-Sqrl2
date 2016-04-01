@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
  */
 public class AuthorizationRequest implements IAuthorizationRequest{
 
+    public boolean fullNut =true;
     protected String CalledUrl ="";
     protected String webProtocol ="http";
     protected String domain ="";
@@ -50,14 +51,15 @@ public class AuthorizationRequest implements IAuthorizationRequest{
     //The called URL up until the query stinrg
     @Override
     public String getReturnURL() {
+        int urlLength = fullNut ? this.CalledUrl.length():this.CalledUrl.indexOf("?") ;
         if(isConnectionPicky) {
             if (this.CalledUrl.contains("sqrl://")) {
-                return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?")).replace("sqrl://", "https://");
+                return this.CalledUrl.substring(0, urlLength).replace("sqrl://", "https://");
             } else if (this.CalledUrl.contains("qrl://")) {
-                return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?")).replace("qrl://", "http://");
+                return this.CalledUrl.substring(0, urlLength).replace("qrl://", "http://");
             }
         }
-        return this.CalledUrl.substring(0, this.CalledUrl.indexOf("?"));
+        return this.CalledUrl.substring(0, urlLength);
     }
 
     @Override

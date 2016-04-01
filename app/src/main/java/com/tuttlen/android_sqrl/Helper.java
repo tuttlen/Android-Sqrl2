@@ -1,5 +1,6 @@
 package com.tuttlen.android_sqrl;
 
+import android.support.annotation.NonNull;
 import android.util.Base64;
 
 import com.android.internal.util.Predicate;
@@ -12,6 +13,11 @@ import org.abstractj.kalium.Sodium;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -200,4 +206,26 @@ public class Helper {
 
         return orredByte >0;
     }
+
+    public static byte[] CombineBytes(byte[] imk, byte[] ilk)
+    {
+        byte[] returnBytes = new byte[imk.length+ilk.length];
+        System.arraycopy(imk,0,returnBytes,0,imk.length);
+        System.arraycopy(ilk,0,returnBytes,imk.length,ilk.length);
+        return returnBytes;
+    }
+
+    public static ArrayList<byte[]> UnCombineBytes(byte[] combinedValues,ArrayList<Integer> size)
+    {
+        int index =0;
+        ArrayList<byte[]> returnBytes= new ArrayList<byte[]>();
+        for (Integer item: size) {
+            byte[] values = new byte[item];
+            System.arraycopy(combinedValues,index,values,0,item);
+            returnBytes.add(values);
+            index+=item;
+        }
+        return returnBytes;
+    }
+
 }

@@ -34,6 +34,7 @@ public class IdentityData implements Serializable{
     //TODO due to the sensitive nature of this item we should put this in a accessor and guard it also needs to be cleared when timeout occurs.
     //TODO Need to reencrypt this with hint password x amount of time after initial login
     public byte[] unecryptedMasterKey;
+    public byte[] identitylockkey;
 
     public IdentityData(String name, String id, String MimeType, boolean selected) {
         this.name =name;
