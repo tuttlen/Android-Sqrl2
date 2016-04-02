@@ -1,6 +1,7 @@
 package com.tuttlen.android_sqrl;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -52,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -66,6 +68,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class MainActivity extends Activity {
+    public ArrayList<String> resultSet = new ArrayList<String>();
     private ListView listOfBT;
     BluetoothAdapter bAdapter;
     private TextView textView1 = null;
@@ -137,6 +140,7 @@ public class MainActivity extends Activity {
                 } else {
                     new createSignature().execute(authReq.getBlueToothURL());
                 }
+
             }
         });
 
@@ -397,8 +401,23 @@ public class MainActivity extends Activity {
         protected void onPostExecute(String[]result) {
             pubKey = result[0];
             sign = result[1];
-
             Context context = getApplicationContext();
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            try {
+
+                String parseResult = resultSet.get(resultSet.size() - 1);
+                SqrlResponse response = new SqrlResponse(parseResult);
+                builder.setTitle("Server response");
+                builder.setMessage(response.tifReuslt);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } catch (UnsupportedEncodingException e)
+            {
+                builder.setMessage("The server did not properly format the response!");
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+
             if (result[2].compareTo("Verified") == 0)
             {
                 Toast.makeText(context, "Verified", Toast.LENGTH_LONG).show(); // show the user
@@ -423,23 +442,14 @@ public class MainActivity extends Activity {
         try
         {
             HttpClient httpClient = new DefaultHttpClient();
-            httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("sqrl", SSLSocketFactory.getSocketFactory(), 443));
             HttpPost httppost = new HttpPost(authReq.getReturnURL());
-            String client = String.format("ver=%s\ncmd=%s\nidk=%s",1,"ident",publicKey);
-            String ids = signature;
-
             httppost.addHeader("User-Agent","SQRL/1");
             httppost.addHeader("Content-type","application/x-www-form-urlencoded");
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
-            client = Helper.urlEncode(client.getBytes());
-            String server = Helper.urlEncode(URL.getBytes());
-            String signature2 = client+server;
-            nameValuePairs.add(new BasicNameValuePair("client",client));
-            nameValuePairs.add(new BasicNameValuePair("server",server));
-            nameValuePairs.add(new BasicNameValuePair("ids",Helper.urlEncode(Helper.Sign(signature2.getBytes(),sK))));
+
+            GenerateSQRLCall(URL, signature,"query", publicKey, sK,  nameValuePairs);
+
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-
             HttpResponse response = httpClient.execute(httppost); // Execute HTTP Post Request
 
             int status = response.getStatusLine().getStatusCode();
@@ -449,6 +459,10 @@ public class MainActivity extends Activity {
                 response.getEntity().writeTo(ostream);
 
                 String out = ostream.toString();
+                //String result = new String(Helper.urlDecode(out),"UTF-8");
+
+                resultSet.add(out);
+
                 Log.v("web", out);
                 // See if the page returned "Verified"
                 //if (out.contains("Verified")) {
@@ -478,6 +492,27 @@ public class MainActivity extends Activity {
         return false; // Return false if query did not return verification
 
 
+    }
+
+    /**
+     *
+     * @param URL - The URL to make the call to this would usually start with http(s)
+     * @param ids - This is the signature of the URL and does not seem to be used anymore
+     * @param cmd - The command as defined ehre (https://www.grc.com/sqrl/semantics.htm)
+     * @param publicKey - The ed25519 public key
+     * @param sK - The private key to sign the client server combination
+     * @param nameValuePairs - The query parameters
+     * @param nameValuePairs - The query parameters
+     * @throws UnsupportedEncodingException
+     */
+    private void GenerateSQRLCall(String URL, String ids,String cmd, String publicKey, byte[] sK,List<NameValuePair> nameValuePairs) throws UnsupportedEncodingException {
+        String client = String.format("ver=%s\ncmd=%s\nidk=%s",AuthorizationRequest.CurrentAuthVersion,cmd,publicKey);
+        client = Helper.urlEncode(client.getBytes());
+        String server = Helper.urlEncode(URL.getBytes());
+        String signature2 = client+server;
+        nameValuePairs.add(new BasicNameValuePair("client",client));
+        nameValuePairs.add(new BasicNameValuePair("server",server));
+        nameValuePairs.add(new BasicNameValuePair("ids", Helper.urlEncode(Helper.Sign(signature2.getBytes(), sK))));
     }
 
     private boolean web_post(String URL, String message, String signature, String publicKey)

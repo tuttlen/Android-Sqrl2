@@ -50,9 +50,6 @@
         <activity
             android:name="com.tuttlen.android_sqrl.GoogleDriveActivity"
             android:label="Google Drive" >
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <activity

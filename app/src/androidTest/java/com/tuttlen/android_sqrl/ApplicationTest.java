@@ -5,6 +5,8 @@ import android.test.ApplicationTestCase;
 
 import junit.framework.Assert;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
@@ -34,6 +36,26 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         String URL ="sqrl://www.grc.com/sqrl?nut=oh5REYgoyG10VejQYz7pcA&sfn=R1JD";
         byte[] signature =Helper.Sign(URL.getBytes(),Helper.urlDecode(privateKey));
         String message ="sqrl://www.grc.com/sqrl?nut=oh5REYgoyG10VejQYz7pcA&sfn=R1JD";
-        testActivity.web_post3(URL,message,Helper.urlEncode(signature),publicKey,Helper.urlDecode(privateKey));
+        testActivity.web_post3(URL, message, Helper.urlEncode(signature), publicKey, Helper.urlDecode(privateKey));
     }
+
+    public void testSimpleTif()
+    {
+        assertEquals("", SqrlResponse.ExtractTIF(192));
+
+    }
+
+    public void testSQRLResponse() throws UnsupportedEncodingException
+    {
+        String responce ="dmVyPTENCm51dD00OGI1NDAyNGYyNDgwZDk0ZjgxMWNlNzc5ZDlkM2ZhYzdjMWRmNzg2YTQ4YWQ2Y2U5MmIzNzE4MTdmNzlmYWQyDQp0aWY9QzANCnFyeT0vbG9naW4vc3FybGF1dGgucGhwP251dD00OGI1NDAyNGYyNDgwZDk0ZjgxMWNlNzc5ZDlkM2ZhYzdjMWRmNzg2YTQ4YWQ2Y2U5MmIzNzE4MTdmNzlmYWQyDQpzZm49VG1GMGFHRnVKM01nUlhoaGJYQnNaU0JUVVZKTUlGTmxjblpsY2c";
+        SqrlResponse response = new SqrlResponse(responce);
+
+        assertEquals(1,response.Version);
+        assertTrue(new String(Helper.urlDecode(response.SFN), "UTF-8").contains("Nathan"));
+        assertTrue(response.tifReuslt.contains("failure"));
+        assertTrue(response.tifReuslt.contains("failed"));
+        assertFalse(response.qry.isEmpty());
+
+    }
+
 }

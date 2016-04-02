@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
  */
 public class AuthorizationRequest implements IAuthorizationRequest{
 
+    public static int CurrentAuthVersion =1;
     public boolean fullNut =true;
     protected String CalledUrl ="";
     protected String webProtocol ="http";
