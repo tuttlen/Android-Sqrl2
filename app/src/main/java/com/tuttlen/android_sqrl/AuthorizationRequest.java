@@ -1,6 +1,7 @@
 package com.tuttlen.android_sqrl;
 
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +24,7 @@ public class AuthorizationRequest implements IAuthorizationRequest{
     protected Pattern regSQRLPattern = Pattern.compile("(http|https|sqrl|qrl):\\/\\/(.*?)\\/(.*)");
     protected Pattern bToothSQRLPattern  = Pattern.compile("(([0-9A-Fa-f]{2}[:-])+([0-9A-Fa-f]{2}))");
     protected  boolean isConnectionPicky =true;
+    public String SFN ="";
 
     @Override
     public boolean isHTTPS() {
@@ -36,6 +38,22 @@ public class AuthorizationRequest implements IAuthorizationRequest{
         } else {
             return this.bluetoothAddress;
         }
+    }
+
+    public String getSigningURL()
+    {
+        this.isConnectionPicky=false;
+        this.fullNut=true;
+
+        return getReturnURL();
+    }
+
+    public AuthorizationRequest getNewNut(String nut)
+    {
+        this.isConnectionPicky=false;
+        this.fullNut=false;
+
+        return new AuthorizationRequest(String.format("%s?nut=%s",this.getReturnURL() ,nut));
     }
 
     public String getFullUrl()
@@ -114,7 +132,70 @@ public class AuthorizationRequest implements IAuthorizationRequest{
     public AuthorizationRequest(String url)
     {
         this.CalledUrl = url;
+        this.isValid =MatchRegularSQRL2(url);
+        //try bluetooth maybe use the same pattern for the initial
+        this.isValidBluetooth = MatchLocalSQRL(this.CalledUrl);
 
+    }
+
+    public boolean MatchRegularSQRL2(String URL)
+    {
+        HashMap<String,String> nvPairs = new HashMap<String,String>();
+        //Did not no what I was thinking. Actually overthinking to be precise
+        //I need to simplify this, it actually can be simplified very easily and
+        //works just as well. SImply use split instructions
+        //this.VersionOneParsing(url);
+        //Split scheme from url "://"
+        String[] schemeUrl = URL.split("://");
+        this.webProtocol =schemeUrl[0];
+        if (schemeUrl.length != 2)
+        {
+            return false;
+        }
+
+        //split domain portion from address portion "/"
+        String[] urlAddress = schemeUrl[1].split("/");
+        if (urlAddress.length <= 1) {
+            return false;
+        }
+        this.domain =urlAddress[0];
+        //We can process the domain portion later
+        //Find last address portion and split the question mark to separate the query separator from the action
+        // the name value pair into dictionary
+        String[] actionAndparameters = urlAddress[urlAddress.length-1].split("\\?");
+        String[] nameValueParis = actionAndparameters[1].split("&");
+
+        for (String nv: nameValueParis
+                )
+        {
+            String[] NandV = nv.split("=");
+            if(NandV.length == 2) {
+                if (!nvPairs.containsKey(NandV[0])) {
+                    nvPairs.put(NandV[0], NandV[1]);
+                } else {
+                    //multiple definitions of nv paris are not allowed
+                    return false;
+                }
+            } else {
+                //There is a possibility of the nut being assumed and therefore no other parameters
+                //in this case the only value expected is the nonce
+                nvPairs.put("nut", NandV[0]);
+            }
+        }
+        if (!nvPairs.containsKey("nut")) {
+            return false;
+        }
+
+        this.nonce =nvPairs.get("nut");
+
+        if(nvPairs.containsKey("sfn")) {
+            this.SFN = nvPairs.get("sfn");
+        }
+        return true;
+    }
+
+    protected void VersionOneParsing(String url)
+    {
         Matcher matchRegular = regSQRLPattern.matcher(url);
         Matcher bMatch = bToothSQRLPattern.matcher(url);
 
@@ -144,6 +225,7 @@ public class AuthorizationRequest implements IAuthorizationRequest{
                 this.isValid =false;
             }
         }
+
     }
 
     private boolean MatchLocalSQRL(String url ) {

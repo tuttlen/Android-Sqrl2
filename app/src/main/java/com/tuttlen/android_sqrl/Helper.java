@@ -25,6 +25,7 @@ import javax.crypto.spec.SecretKeySpec;
 import eu.artemisc.stodium.Ed25519;
 import eu.artemisc.stodium.GenericHash;
 import eu.artemisc.stodium.RandomBytes;
+import eu.artemisc.stodium.ScalarMult;
 import eu.artemisc.stodium.Stodium;
 
 /**
@@ -137,7 +138,7 @@ public class Helper {
             }
             result=nextResult;
         }
-        return Helper.massXOR(nextResult,xorresult);
+        return Helper.massXOR(nextResult, xorresult);
     }
 
     public static byte[] CreatePrivateHMAC(String domain, byte[] key)
@@ -148,7 +149,7 @@ public class Helper {
         byte[] privatekey = new byte[64];
 
         Sodium.crypto_auth_hmacsha256(out, messageBytes, messageBytes.length, key);
-        Sodium.crypto_sign_seed_keypair(publicKey,privatekey,out);
+        Sodium.crypto_sign_seed_keypair(publicKey, privatekey, out);
         return privatekey;
     }
 
@@ -182,10 +183,6 @@ public class Helper {
         return privateKey;
     }
 
-
-
-
-
     public static boolean Verify(byte[] sMessage,byte[] message,  byte[] publicKey)
     {
         return Ed25519.verifyDetached(sMessage,message,publicKey);
@@ -198,22 +195,39 @@ public class Helper {
         return  outHash;
     }
 
+    /**
+     *
+     * @param result - Result of decryption
+     * @return - Whether the Encryption was successful
+     */
     public static boolean determineAuth(String result) {
         byte[] hexResult = Helper.hexStringToByteArray(result);
+        return Helper.OrContents(hexResult) >0 ;
+    }
+
+    /**
+     * This function is useful for comparing buffers.
+     * Use with massXOR and determineAuth
+     * @param orCandidate - A set of values
+     * @return The candidate orred together
+     */
+    public static int OrContents(byte[] orCandidate)
+    {
         int orredByte =0;
 
-        for (int i = 0; i < hexResult.length; i++) {
-            orredByte |= hexResult[i];
+        for (int i = 0; i < orCandidate.length; i++) {
+            orredByte |= orCandidate[i];
         }
 
-        return orredByte >0;
+        return orredByte;
+
     }
 
     public static byte[] CombineBytes(byte[] imk, byte[] ilk)
     {
         byte[] returnBytes = new byte[imk.length+ilk.length];
         System.arraycopy(imk,0,returnBytes,0,imk.length);
-        System.arraycopy(ilk,0,returnBytes,imk.length,ilk.length);
+        System.arraycopy(ilk, 0, returnBytes, imk.length, ilk.length);
         return returnBytes;
     }
 
@@ -223,11 +237,60 @@ public class Helper {
         ArrayList<byte[]> returnBytes= new ArrayList<byte[]>();
         for (Integer item: size) {
             byte[] values = new byte[item];
-            System.arraycopy(combinedValues,index,values,0,item);
+            System.arraycopy(combinedValues, index, values, 0, item);
             returnBytes.add(values);
             index+=item;
         }
         return returnBytes;
     }
 
+    /**
+     *
+     * @param publicKey - Public key
+     * @param randomLock - Private key
+     * @return - Shared secret
+     */
+    public static byte[] DHKA(byte[] publicKey, byte[] randomLock)
+    {
+        byte[] sharedSecret = new byte[32];
+        //ScalarMult.scalarMult(sharedSecret,randomLock,publicKey);
+        Sodium.crypto_scalarmult(sharedSecret,randomLock,publicKey);
+        return sharedSecret;
+    }
+
+    /**
+     *
+     * @param publicKey - Public key
+     * @param randomLock - Private key
+     * @return - Shared secret
+     */
+    public static byte[] DHKA3(byte[] publicKey, byte[] randomLock) {
+        byte[] publicKey_curve = new byte[32];
+
+        byte[] randomLock_curve = new byte[64];
+        byte[] sharedSecret = new byte[32];
+
+        Sodium.crypto_sign_ed25519_pk_to_curve25519(publicKey_curve, publicKey);
+
+        Sodium.crypto_sign_ed25519_sk_to_curve25519(randomLock_curve, randomLock);
+        Sodium.crypto_scalarmult(sharedSecret, randomLock_curve, publicKey_curve);
+        return sharedSecret;
+    }
+
+
+
+    /**
+     *
+     * @param publicKey - Public key
+     * @param randomSeed - Private key
+     * @return - Shared secret
+     */
+    public static byte[] DHKA2(byte[] publicKey, byte[] randomSeed)
+    {
+        byte[] sharedSecret = new byte[32];
+        //ScalarMult.scalarMult(sharedSecret,randomLock,publicKey);
+        ScalarMult.scalarMultBase(publicKey,randomSeed);
+        Sodium.crypto_scalarmult(sharedSecret,randomSeed,publicKey);
+        return sharedSecret;
+    }
 }

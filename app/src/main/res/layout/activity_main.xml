@@ -8,16 +8,37 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-
-<TextView
-        android:id="@+id/textView1"
+    <TextView
+        android:id="@+id/idName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="18dp"
         android:layout_marginTop="18dp"
+        android:text="Test Identity"
+        android:textSize="@dimen/abc_text_size_display_1_material" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="18dp"
+        android:layout_marginTop="18dp"
+        android:layout_below="@+id/idName"
         android:text="Please wait, this will take time" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/idName"
+        android:layout_below="@+id/idName"
+        android:layout_marginTop="34dp"
+        android:text="Signature:"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+
 
     <Button
         android:id="@+id/confbutton"
@@ -39,14 +60,6 @@
         android:layout_marginTop="14dp"
         android:text="Scan" />
 
-    <EditText
-        android:id="@+id/publicKeyText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
-        android:layout_marginTop="33dp"
-        android:ems="10" />
-
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
@@ -57,15 +70,6 @@
         android:text="Public key:"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/publicKeyText"
-        android:layout_below="@+id/publicKeyText"
-        android:layout_marginTop="34dp"
-        android:text="Signature:"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
         android:id="@+id/signatureText"

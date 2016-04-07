@@ -1,10 +1,12 @@
 package com.tuttlen.android_sqrl;
 
 import android.test.InstrumentationTestCase;
+import android.util.Base64;
 
 import com.tuttlen.aesgcm_android.AESGCMJni4;
 
 import org.abstractj.kalium.Sodium;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -15,6 +17,9 @@ import org.junit.Ignore;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+
+import eu.artemisc.stodium.Ed25519;
+import eu.artemisc.stodium.ScalarMult;
 
 /**
  * Created by tuttlen on 1/23/2016.
@@ -352,8 +357,225 @@ public class CryptoTests extends InstrumentationTestCase {
         String test3 = Helper.bytesToHex(Helper.urlDecode(urlOneEqul0));
 
         assertEquals("69",test1);
-        assertEquals("69a6",test2);
-        assertEquals("69a69a",test3);
+        assertEquals("69a6", test2);
+        assertEquals("69a69a", test3);
     }
+
+    public void testcomputeScalarDHKA() {
+        byte[] clientPrivateSeed = Helper.CreateRandom(32);
+        byte[] serverPrivateSeed = Helper.CreateRandom(32);
+        byte[] clientPublic2 = new byte[32];
+        byte[] serverPublic2 = new byte[32];
+
+        byte[] clientPrivate = Helper.CreatePrivateKeyFromSeed(clientPrivateSeed);
+        byte[] clientPublic = Helper.PublicKeyFromPrivateKey(clientPrivate);
+        byte[] serverPrivate = Helper.CreatePrivateKeyFromSeed(serverPrivateSeed);
+        byte[] serverPublic = Helper.PublicKeyFromPrivateKey(serverPrivate);
+
+        ScalarMult.scalarMultBase(clientPublic2, clientPrivateSeed);
+        ScalarMult.scalarMultBase(serverPublic2, serverPrivateSeed);
+
+        assertEquals(Helper.bytesToHex(clientPublic2), Helper.bytesToHex(clientPublic));
+        assertEquals(Helper.bytesToHex(serverPublic2),Helper.bytesToHex(serverPublic));
+
+    }
+
+    public void testcomputeDHKA() {
+        byte[] server_pK = Base64.decode("XL5TFg6aLpayZVvWCzjqUGTd8bQgH9UEuiLINmnVjUI=",Base64.DEFAULT);
+        byte[] client_pK = Base64.decode("z6AGXXGNlHiT9p7GOQCrHdTiwCEdr+oEU1xgQQm/VXo=",Base64.DEFAULT);
+
+        byte[] client_rand = Base64.decode("rqNKRgYQ8PkqaAYNEU7B611mxvZovZvbbIRhu6g1HU8=",Base64.DEFAULT);
+        byte[] server_rand = Base64.decode("/4qXF5KW5vgl1NN7vyd9mnF9RWSggY2S5rpFGS3tjfg=",Base64.DEFAULT);
+
+        /*
+        android.util.Log.d(".netTest", String.format("Curve Client pK", Helper.bytesToHex(serverSS)));
+        android.util.Log.d(".netTest", String.format("Client sK", Helper.bytesToHex(serverSS)));
+
+        android.util.Log.d(".netTest", String.format("Server pK", Helper.bytesToHex(serverSS)));
+        android.util.Log.d(".netTest", String.format("Server sK", Helper.bytesToHex(serverSS)));
+
+        android.util.Log.d(".netTest", "Derived");
+        android.util.Log.d(".netTest", String.format("Client pK", Helper.bytesToHex(serverSS)));
+        android.util.Log.d(".netTest", String.format("Client sK", Helper.bytesToHex(serverSS)));
+
+        android.util.Log.d(".netTest", String.format("Server pK", Helper.bytesToHex(serverSS)));
+        android.util.Log.d(".netTest", String.format("Server sK", Helper.bytesToHex(serverSS)));
+        */
+
+        byte[] clientPrivateSeed = Helper.CreateRandom(32);
+        byte[] serverPrivateSeed = Helper.CreateRandom(32);
+        byte[] clientPrivate = new byte[64];
+        byte[] clientPublic = new byte[32];
+        byte[] serverPrivate = new byte[64];
+        byte[] serverPublic = new byte[32];
+
+        Ed25519.keypairSeed(clientPublic, clientPrivate, clientPrivateSeed);
+        Ed25519.keypairSeed(serverPublic,serverPrivate,serverPrivateSeed);
+        byte[] serverSS = new byte[32];
+        byte[] clientSS = new byte[32];
+        byte[] serverPublic_curve = new byte[32];
+        byte[] clientPublic_curve = new byte[32];
+
+        byte[] serverPrivate_curve = new byte[64];
+        byte[] clientPrivate_curve = new byte[64];
+
+        Sodium.crypto_sign_ed25519_pk_to_curve25519(serverPublic_curve,serverPublic);
+        Sodium.crypto_sign_ed25519_pk_to_curve25519(clientPublic_curve,clientPublic);
+
+        Sodium.crypto_sign_ed25519_sk_to_curve25519(serverPrivate_curve, serverPrivate);
+        Sodium.crypto_sign_ed25519_sk_to_curve25519(clientPrivate_curve, clientPrivate);
+
+        android.util.Log.d("test", String.format("Client Curve sK: %s", Helper.urlEncode(clientPrivate_curve)));
+        android.util.Log.d("test", String.format("Client Curve pK: %s", Helper.urlEncode(clientPublic_curve)));
+
+        android.util.Log.d("test", String.format("Server Curve sK: %s", Helper.urlEncode(serverPrivate_curve)));
+        android.util.Log.d("test", String.format("Server Curve pK: %s", Helper.urlEncode(serverPublic_curve)));
+
+        Sodium.crypto_scalarmult(serverSS, clientPrivate_curve, serverPublic_curve);
+        Sodium.crypto_scalarmult(clientSS, serverPrivate_curve, clientPublic_curve);
+
+        android.util.Log.d("test", String.format("Server Shared secret: %s", Helper.bytesToHex(serverSS)));
+        android.util.Log.d("test", String.format("Client Shared secret: %s", Helper.bytesToHex(clientSS)));
+
+        assertTrue(Helper.OrContents(Helper.massXOR(clientSS, serverSS)) == 0);
+    }
+
+    public void testcomputeDHKA2() {
+        byte[] clientPrivateSeed = Helper.CreateRandom(32);
+        byte[] serverPrivateSeed = Helper.CreateRandom(32);
+        byte[] clientPrivate = Helper.CreatePrivateKeyFromSeed(clientPrivateSeed);
+        byte[] clientPublic= Helper.PublicKeyFromPrivateKey(clientPrivate);
+        byte[] serverPrivate= Helper.CreatePrivateKeyFromSeed(serverPrivateSeed);
+        byte[] serverPublic= Helper.PublicKeyFromPrivateKey(serverPrivate);
+
+
+        //Ed25519.keypairSeed(clientPublic,clientPrivate,clientPrivateSeed);
+        //Ed25519.keypairSeed(serverPublic, serverPrivate, serverPrivateSeed);
+        ScalarMult.scalarMultBase(clientPublic,clientPrivateSeed);
+        ScalarMult.scalarMultBase(serverPublic,serverPrivateSeed);
+
+        byte[] serverSS = Helper.DHKA(clientPublic, serverPrivateSeed);
+        byte[] clientSS = Helper.DHKA(serverPublic, clientPrivateSeed);
+
+        android.util.Log.d("test", String.format("Server Shared secret: %s", Helper.bytesToHex(serverSS)));
+        android.util.Log.d("test", String.format("Client Shared secret: %s", Helper.bytesToHex(clientSS)));
+
+        assertTrue(Helper.OrContents(Helper.massXOR(clientSS, serverSS)) == 0);
+
+    }
+
+    public void testVerifyVUKSUK_current()
+    {
+        byte[] IdentityUnLockKey = Helper.CreateRandom(32);
+        byte[] IdentityLockKey = Helper.CreateRandom(64);
+
+        IdentityLockKey = Helper.CreatePrivateKeyFromSeed(IdentityUnLockKey);
+        //we require a 64 bit private key but we have to start from a random 32 byte value
+        //so we generate this from a 32 byte seed this value is IuK
+        IdentityLockKey = Helper.PublicKeyFromPrivateKey(IdentityLockKey);
+
+        byte[] RandomLock = Helper.CreatePrivateKeyFromSeed(Helper.CreateRandom(32));
+        byte[] ServerUnlock =Helper.PublicKeyFromPrivateKey(RandomLock);
+        byte[] VerifyUnlock = new byte[32];
+        byte[] EmtprySk = new byte[64];
+        Sodium.crypto_sign_seed_keypair(VerifyUnlock, EmtprySk, Helper.DHKA3(IdentityLockKey, RandomLock));
+        byte[] ss1 =Helper.DHKA3(IdentityLockKey, RandomLock);
+        byte[] ss2 =Helper.DHKA3(ServerUnlock, Helper.CreatePrivateKeyFromSeed(IdentityUnLockKey));
+
+        assertEquals(Helper.bytesToHex(ss1), Helper.bytesToHex(ss2));
+
+
+    }
+
+    public void testVerifyVUKSUK2()
+    {
+        byte[] IdentityUnLockKey = Helper.CreateRandom(64);
+        byte[] IdentityLockKey = Helper.CreateRandom(32);
+
+        IdentityLockKey =Helper.PublicKeyFromPrivateKey(IdentityUnLockKey);
+
+        //we require a 64 bit private key but we have to start from a random 32 byte value
+        //so we generate this from a 32 byte seed this value is IuK
+        //IdentityLockKey =Helper.PublicKeyFromPrivateKey(IdentityLockKey);
+
+        byte[] RandomLock = Helper.CreateRandom(64);
+        byte[] ServerUnlock =new byte[32];
+        byte[] VerifyUnlock = new byte[32];
+        byte[] EmtprySk = new byte[64];
+        Sodium.crypto_sign_seed_keypair(VerifyUnlock, EmtprySk, Helper.DHKA(IdentityLockKey, RandomLock));
+        ServerUnlock = Helper.PublicKeyFromPrivateKey(RandomLock);
+        byte[] ss1 =Helper.DHKA(IdentityLockKey, RandomLock);
+        byte[] ss2 =Helper.DHKA(ServerUnlock, IdentityUnLockKey);
+        assertEquals(Helper.bytesToHex(ss1),Helper.bytesToHex(ss2));
+
+
+    }
+
+    public void testVerifyVUKSUK3()
+    {
+        byte[] IdentityUnLockKey = Helper.CreateRandom(32);
+        byte[] IdentityLockKey = Helper.CreateRandom(32);
+
+        IdentityLockKey =Helper.PublicKeyFromPrivateKey(Helper.CreatePrivateKeyFromSeed(IdentityUnLockKey));
+
+        //we require a 64 bit private key but we have to start from a random 32 byte value
+        //so we generate this from a 32 byte seed this value is IuK
+        //IdentityLockKey =Helper.PublicKeyFromPrivateKey(IdentityLockKey);
+
+        byte[] RandomLock = Helper.CreateRandom(32);
+        byte[] ServerUnlock =new byte[32];
+        byte[] VerifyUnlock = new byte[32];
+        byte[] EmptySK = new byte[64];
+        byte[] EmptyPK = new byte[32];
+        byte[] UnlockRequestSigning = new byte[64];
+
+        ServerUnlock = Helper.PublicKeyFromPrivateKey(Helper.CreatePrivateKeyFromSeed(RandomLock));
+
+        Sodium.crypto_sign_seed_keypair(VerifyUnlock, EmptySK, Helper.DHKA3(IdentityLockKey, Helper.CreatePrivateKeyFromSeed(RandomLock)));
+
+        Sodium.crypto_sign_seed_keypair(EmptyPK, UnlockRequestSigning, Helper.DHKA3(ServerUnlock, Helper.CreatePrivateKeyFromSeed(IdentityUnLockKey)));
+
+
+        byte[] sMessage = Helper.Sign("test".getBytes(), UnlockRequestSigning);
+        Helper.Verify(sMessage, "test".getBytes(), VerifyUnlock);
+
+
+    }
+
+    public void testMyUnderstandingOfEd25519()
+    {
+        byte[] message ="hellow".getBytes();
+        byte[] privateKeyseed1 = Helper.CreateRandom(32);
+        byte[] privateKeyseed2 = Helper.CreateRandom(32);
+
+        byte[] publicKey1 = new byte[32];
+        byte[] publicKey2 = new byte[32];
+        byte[] privateKey1 = new byte[64];
+        byte[] privateKey2 = new byte[64];
+
+        Sodium.crypto_sign_ed25519_sk_to_pk(publicKey1,  privateKeyseed1);
+        Sodium.crypto_sign_ed25519_sk_to_pk(publicKey2, privateKeyseed2);
+        byte[] pk1 = new byte[32];
+
+        Sodium.crypto_sign_ed25519_seed_keypair(pk1, privateKey1, privateKeyseed1);
+        byte[] randomSeed = new byte[32];
+        Sodium.crypto_sign_ed25519_sk_to_seed(randomSeed,privateKey1);
+        assertEquals(Helper.bytesToHex(randomSeed),Helper.bytesToHex(privateKeyseed1));
+        assertEquals(Helper.bytesToHex(pk1), Helper.bytesToHex(publicKey1));
+
+        byte[] sMessage1 = Helper.Sign(message, privateKeyseed1);
+        byte[] sMessage2 = Helper.Sign(message, privateKeyseed2);
+
+        assertTrue(Helper.Verify(sMessage1, message, publicKey1));
+        assertTrue(Helper.Verify(sMessage2, message, publicKey2));
+
+        assertFalse(Helper.Verify(sMessage1, message, publicKey2));
+        assertFalse(Helper.Verify(sMessage2, message, publicKey1));
+
+        byte[] result1 = Helper.DHKA(publicKey1, privateKeyseed2);
+        byte[] result2 = Helper.DHKA(publicKey2, privateKeyseed1);
+        assertEquals(Helper.bytesToHex(result1),Helper.bytesToHex(result2));
+    }
+
 
 }

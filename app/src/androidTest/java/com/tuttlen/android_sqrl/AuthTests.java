@@ -65,30 +65,22 @@ public class AuthTests extends InstrumentationTestCase {
     public void testAuth_malformed_url() throws Exception{
 
         AuthorizationRequest req = new AuthorizationRequest("example.com/sqrl?4095c8adfa51dabe30fe9f9474d3f91def620300e489e6853baa67bed5d5e0d4");
-        //For empty protocol lets assume http
-        assertEquals(true,req.IsValid());
-        assertEquals("example.com",req.getDomain());
-        req.fullNut =false;
-        assertEquals("http://example.com/sqrl",req.getReturnURL());
+        //There is no need to be this forgiving. Noone would expect it and I see no benefit in leaving it out
+        assertEquals(false,req.IsValid());
     }
 
     public void testAuth_malformed_url2() throws Exception{
 
         AuthorizationRequest req = new AuthorizationRequest("10.0.0.2/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
-        //Changed an empty protocol to default to http this may chagne
-        assertEquals(true,req.IsValid());
-        assertEquals("10.0.0.2",req.getDomain());
-        req.fullNut =false;
-        assertEquals("http://10.0.0.2/sqrl",req.getReturnURL());
+        //There is no need to be this forgiving. Noone would expect it and I see no benefit in leaving it out
+        assertEquals(false,req.IsValid());
     }
 
-    public void testAuth_malformed_url3() throws Exception{
-        //this test just changed, I decided to make this format invalid
+    public void testAuth_malformed_url3() throws Exception
+    {
         AuthorizationRequest req = new AuthorizationRequest("10.0.0.2.5/sqrl?972764a6021a2649e9bbecfd52c36f13b30a260dbc5c373a53e9d7ae502d0c3a");
-        assertEquals(req.IsValid(),true);
-        assertEquals("10.0.0.2.5",req.getDomain());
-        req.fullNut =false;
-        assertEquals("http://10.0.0.2.5/sqrl",req.getReturnURL());
+        //There is no need to be this forgiving. Noone would expect it and I see no benefit in leaving it out
+        assertEquals(false,req.IsValid());
     }
     public void test_btooth_proper() throws Exception
     {
@@ -134,6 +126,14 @@ public class AuthTests extends InstrumentationTestCase {
 
     }
 
+    public void testSqrlWithSFN()
+    {
+        String sqrlAddress ="sqrl://www.grc.com/sqrl?nut=uogovZVHZtJPMorOw4RHgw&sfn=R1JD";
+        AuthorizationRequest aReq = new AuthorizationRequest(sqrlAddress);
+        assertEquals("uogovZVHZtJPMorOw4RHgw",aReq.nonce);
+
+    }
+
     public void testQRlAddressSignatureSend()
     {
         //qrl://10.0.0.27/login/sqrlauth.php?nut=5f7d471e26450c1539fe73b7867a789abb0c7de6f4246f1e719d7b2830e73de2
@@ -144,6 +144,23 @@ public class AuthTests extends InstrumentationTestCase {
         assertEquals("393cbc323070c8281e05bd8554f8d8d409cd9c64267f358cac41c121b1720299", req.getNonce());
         assertTrue(req.getReturnURL().startsWith("http"));
         assertTrue(req.getReturnURL().endsWith("nut=393cbc323070c8281e05bd8554f8d8d409cd9c64267f358cac41c121b1720299"));
+    }
+
+    public void testQRLAddressNewNut()
+    {
+        //qrl://10.0.0.27/login/sqrlauth.php?nut=5f7d471e26450c1539fe73b7867a789abb0c7de6f4246f1e719d7b2830e73de2
+        String qrlAddress ="qrl://10.0.0.27/login/sqrlauth.php?nut=393cbc323070c8281e05bd8554f8d8d409cd9c64267f358cac41c121b1720299";
+        AuthorizationRequest req = new AuthorizationRequest(qrlAddress);
+        assertEquals(true, req.isValid);
+        assertEquals("10.0.0.27", req.domain);
+        assertEquals("393cbc323070c8281e05bd8554f8d8d409cd9c64267f358cac41c121b1720299", req.getNonce());
+        assertTrue(req.getReturnURL().startsWith("http"));
+        assertTrue(req.getReturnURL().endsWith("nut=393cbc323070c8281e05bd8554f8d8d409cd9c64267f358cac41c121b1720299"));
+        String newNut = Helper.urlEncode(Helper.CreateRandom(32));
+        AuthorizationRequest newnutaddress = req.getNewNut(newNut);
+        assertTrue(newnutaddress.getReturnURL().startsWith("http"));
+        assertTrue(newnutaddress.getReturnURL().endsWith(newNut));
+        assertEquals(String.format("http://10.0.0.27/login/sqrlauth.php?nut=%s",newNut),newnutaddress.getReturnURL());
     }
 
     public void test_NewAuthRequest() throws Exception

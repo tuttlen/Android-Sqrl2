@@ -27,7 +27,7 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         String testReuslt = req.getDomain();
         assertEquals(testReuslt,"");
     }
-
+/*
     public void testPostSqrl()
     {
         String privateKey ="9U0eUkrV18ObhG+n7M/DqFlxPaSqytkHwL4RLuXtlkbF8JB2XUxF4Lxj0qpe0SI3aLErphECKU6P+1eKBfqYlw==";
@@ -38,7 +38,7 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         String message ="sqrl://www.grc.com/sqrl?nut=oh5REYgoyG10VejQYz7pcA&sfn=R1JD";
         testActivity.web_post3(URL, message, Helper.urlEncode(signature), publicKey, Helper.urlDecode(privateKey));
     }
-
+*/
     public void testSimpleTif()
     {
         assertEquals("", SqrlResponse.ExtractTIF(192));
@@ -55,6 +55,8 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         assertTrue(response.tifReuslt.contains("failure"));
         assertTrue(response.tifReuslt.contains("failed"));
         assertFalse(response.qry.isEmpty());
+        assertFalse(response.nut.contains("nut"));
+
 
     }
 

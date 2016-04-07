@@ -27,6 +27,7 @@ import com.google.api.client.googleapis.auth.clientlogin.ClientLogin;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.abstractj.kalium.Sodium;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -72,7 +73,7 @@ public class MainActivity extends Activity {
     private ListView listOfBT;
     BluetoothAdapter bAdapter;
     private TextView textView1 = null;
-    private EditText publicKeyText = null;
+    private TextView idName = null;
     private EditText signatureText = null;
     private Button confbutton = null;
     private Button scanButton = null;
@@ -97,7 +98,8 @@ public class MainActivity extends Activity {
         //TODO move out BT to another activity this activity will be split into the handling activity and there will be two new identities btooth and IPC
         listOfBT = (ListView) findViewById(R.id.listView);
         textView1 = (TextView) findViewById(R.id.textView1);
-        publicKeyText = (EditText) findViewById(R.id.publicKeyText);
+        idName = (TextView) findViewById(R.id.idName);
+
         signatureText = (EditText) findViewById(R.id.signatureText);
         //exportPublicKeys
         exportKey = (Button) findViewById(R.id.exportPublicKeys);
@@ -132,7 +134,6 @@ public class MainActivity extends Activity {
 
         confbutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                publicKeyText.setText("Please wait this will take time");
                 confbutton.setEnabled(false);
 
                 if(!authReq.isValidBluetooth) {
@@ -167,6 +168,8 @@ public class MainActivity extends Activity {
             //TODO check to see if bluetooth is off and update this text. Otherwise scream at the user
             Toast.makeText(getApplicationContext(), "Bluetooth is not emabled or is not working, the app will not function peer to peer", Toast.LENGTH_LONG).show(); // show the user
         }
+
+
     }
 
     /*
@@ -289,10 +292,10 @@ public class MainActivity extends Activity {
         super.onPause();
         // Reset for new scan
         textView1.setText("");
-        publicKeyText.setText("");
         signatureText.setText("");
+        idName.setText("");
         confbutton.setEnabled(true);
-        authReq = null;
+        //authReq = null;
     }
 
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data)
@@ -306,6 +309,7 @@ public class MainActivity extends Activity {
             } else if(data.getSerializableExtra("sqrlid") !=null)
             {
                 current_sqrl_identity = (IdentityData) data.getSerializableExtra("sqrlid");
+                this.idName.setText(current_sqrl_identity.name);
             }
         }
 
@@ -375,8 +379,30 @@ public class MainActivity extends Activity {
 
                     //Even though the nut is encoded in the variable some servers expect to see it in the URL as well
                     authReq.fullNut=true;
+                    ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                    try {
+                        nameValuePairs =GenerateSQRLCall(authReq.CalledUrl, authReq.getURL(), "query", publicKey_s, privateKey);
+                    } catch(UnsupportedEncodingException e){}
 
-                    result = web_post3(authReq.CalledUrl, authReq.getURL(), sign_s, publicKey_s, privateKey);
+
+                    result = web_post3(nameValuePairs, authReq);
+                    //if query result is successful
+                    if(result) {
+                        try {
+                            String parseResult = resultSet.get(resultSet.size() - 1);
+                            SqrlResponse response = new SqrlResponse(parseResult);
+                            if((Integer.parseInt(response.tifHex,16) & 1) == 0) {
+                                //server does not recognize so send an SUK/VUk pair
+                                AuthorizationRequest newNutResponse =authReq.getNewNut(response.nut);
+                                newNutResponse.isConnectionPicky=true;
+                                newNutResponse.fullNut=true;
+                                nameValuePairs = GenerateSQRLCall2(newNutResponse.CalledUrl, authReq.getURL(), "ident", publicKey_s, privateKey);
+                                result = web_post3(nameValuePairs,newNutResponse);
+                            }
+                        } catch(UnsupportedEncodingException e)
+                        {}
+                    }
+
                 }
                 if (result) {
                     return new String[]{publicKey_s, sign_s, "Verified"};
@@ -425,8 +451,9 @@ public class MainActivity extends Activity {
                 Toast.makeText(context, "Failed to verify", Toast.LENGTH_LONG).show(); // show the user
             }
             //TODO this is good for debugging but the user does not need to see this
-            publicKeyText.setText(pubKey);
+
             signatureText.setText(sign);
+
         }
     }
 
@@ -437,17 +464,17 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    public boolean web_post3(String URL, String message, String signature, String publicKey, byte [] sK)
+    public boolean web_post3(ArrayList<NameValuePair> nameValuePairs, AuthorizationRequest theRequest )
     {
         try
         {
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost(authReq.getReturnURL());
+            theRequest.isConnectionPicky =true;
+            theRequest.fullNut =true;
+            HttpPost httppost = new HttpPost(theRequest.getReturnURL());
             httppost.addHeader("User-Agent","SQRL/1");
-            httppost.addHeader("Content-type","application/x-www-form-urlencoded");
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+            httppost.addHeader("Content-type", "application/x-www-form-urlencoded");
 
-            GenerateSQRLCall(URL, signature,"query", publicKey, sK,  nameValuePairs);
 
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             HttpResponse response = httpClient.execute(httppost); // Execute HTTP Post Request
@@ -501,20 +528,61 @@ public class MainActivity extends Activity {
      * @param cmd - The command as defined ehre (https://www.grc.com/sqrl/semantics.htm)
      * @param publicKey - The ed25519 public key
      * @param sK - The private key to sign the client server combination
-     * @param nameValuePairs - The query parameters
-     * @param nameValuePairs - The query parameters
+     * @return nameValuePairs - The query parameters
      * @throws UnsupportedEncodingException
      */
-    private void GenerateSQRLCall(String URL, String ids,String cmd, String publicKey, byte[] sK,List<NameValuePair> nameValuePairs) throws UnsupportedEncodingException {
+    private  ArrayList<NameValuePair>  GenerateSQRLCall(String URL, String ids,String cmd, String publicKey, byte[] sK) throws UnsupportedEncodingException {
+        ArrayList<NameValuePair> nameValuePairs= new ArrayList<NameValuePair>(4);
         String client = String.format("ver=%s\ncmd=%s\nidk=%s",AuthorizationRequest.CurrentAuthVersion,cmd,publicKey);
         client = Helper.urlEncode(client.getBytes());
         String server = Helper.urlEncode(URL.getBytes());
         String signature2 = client+server;
         nameValuePairs.add(new BasicNameValuePair("client",client));
+        //we do not use the incoming parameter
+        String ids2 = Helper.urlEncode(Helper.Sign(signature2.getBytes(), sK));
+        nameValuePairs.add(new BasicNameValuePair("ids",ids2 ));
         nameValuePairs.add(new BasicNameValuePair("server",server));
-        nameValuePairs.add(new BasicNameValuePair("ids", Helper.urlEncode(Helper.Sign(signature2.getBytes(), sK))));
+
+        return nameValuePairs;
     }
 
+    /**
+     *
+     * @param URL - The URL to make the call to this would usually start with http(s)
+     * @param ids - This is the signature of the URL and does not seem to be used anymore
+     * @param cmd - The command as defined ehre (https://www.grc.com/sqrl/semantics.htm)
+     * @param publicKey - The ed25519 public key
+     * @param sK - The private key to sign the client server combination
+     * @return nameValuePairs - The query parameters
+     * @throws UnsupportedEncodingException
+     */
+    private ArrayList<NameValuePair>  GenerateSQRLCall2(String URL, String ids,String cmd, String publicKey, byte[] sK) throws UnsupportedEncodingException {
+        ArrayList<NameValuePair> nameValuePairs= new ArrayList<NameValuePair>(5);
+        byte[] RandomLock = Helper.CreatePrivateKeyFromSeed(Helper.CreateRandom(32));
+        byte[] ServerUnlock =Helper.PublicKeyFromPrivateKey(RandomLock);
+        byte[] VerifyUnlock = new byte[32];
+        byte[] EmtprySk = new byte[64];
+        Sodium.crypto_sign_seed_keypair(VerifyUnlock, EmtprySk, Helper.DHKA3(current_sqrl_identity.identitylockkey, RandomLock));
+        String client = String.format("ver=%s\ncmd=%s\nidk=%s\nsuk=%s\nvuk=%s\n",
+                AuthorizationRequest.CurrentAuthVersion,cmd,publicKey,Helper.urlEncode(ServerUnlock),Helper.urlEncode(VerifyUnlock));
+        client = Helper.urlEncode(client.getBytes());
+        String server = Helper.urlEncode(URL.getBytes());
+        String signature2 = client+server;
+        nameValuePairs.add(new BasicNameValuePair("client",client));
+        nameValuePairs.add(new BasicNameValuePair("server", server));
+        nameValuePairs.add(new BasicNameValuePair("ids", Helper.urlEncode(Helper.Sign(signature2.getBytes(), sK))));
+        return nameValuePairs;
+    }
+
+    /**
+     *
+     *
+     * @param URL
+     * @param message
+     * @param signature
+     * @param publicKey
+     * @return
+     */
     private boolean web_post(String URL, String message, String signature, String publicKey)
     {
         try {
