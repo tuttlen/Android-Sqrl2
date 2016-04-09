@@ -2,18 +2,22 @@ package com.tuttlen.android_sqrl;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DownloadManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -321,8 +325,90 @@ public class MainActivity extends Activity {
             //TODO this is where we will determine the activity for btooth
             authReq = new AuthorizationRequest(scanned);
             confbutton.setEnabled(true);
+            ShouldAuthenticate(authReq.domain,authReq.SFN);
             textView1.setText("Authenticate to " + authReq.getDomain());
         }
+    }
+
+    protected void ShouldAuthenticate(String domain, String sfn)
+    {
+        //AuthAlertFragment fragment = new AuthAlertFragment();
+        //Bundle args =new Bundle();
+        //args.putString("domain",domain);
+        //args.putString("sfn",sfn);
+        //fragment.setArguments(args);
+        //fragment.show(getFragmentManager(), "Auth");
+        final Dialog dialog = new Dialog(this);
+        dialog.setTitle("Authenticate To");
+        dialog.setContentView(R.layout.activity_authenticate);
+
+        TextView tvDomain = (TextView)dialog.findViewById(R.id.tvDomain);
+        TextView tvSFN = (TextView)dialog.findViewById(R.id.tvSFN);
+        tvDomain.setText(domain);
+        try {
+            tvSFN.setText(new String(Helper.urlDecode(sfn), "UTF-8"));
+            Button btnConfirm = (Button) dialog.findViewById(R.id.btnConfirm);
+            Button btnReject = (Button) dialog.findViewById(R.id.btnReject);
+            btnConfirm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!authReq.isValidBluetooth) {
+                        new createSignature().execute(authReq.getURL());
+                    } else {
+                        new createSignature().execute(authReq.getBlueToothURL());
+                    }
+                    dialog.dismiss();
+
+                }
+            });
+            btnReject.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+        } catch (Exception e) {
+
+        }
+        dialog.show();
+        /*
+        LayoutInflater inflater = this.getLayoutInflater();
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        try {
+            builder.setTitle("Authenticate To");
+            builder.setMessage(String.format("Authenticate to %s known as %s", domain, Helper.urlDecode(sfn)));
+
+            builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (!authReq.isValidBluetooth) {
+                        new createSignature().execute(authReq.getURL());
+                    } else {
+                        new createSignature().execute(authReq.getBlueToothURL());
+                    }
+                }
+            });
+
+            builder.setNegativeButton("Reject", null);
+            builder.setView(inflater.inflate(R.layout.activity_authenticate, null));
+
+            AlertDialog dialog = builder.create();
+            dialog.setContentView(R.layout.activity_authenticate);
+
+            TextView tvDomain = (TextView)dialog.findViewById(R.id.tvDomain);
+            TextView tvSFN = (TextView)dialog.findViewById(R.id.tvSFN);
+            tvDomain.setText(domain);
+            tvSFN.setText(sfn);
+
+            dialog.show();
+
+        } catch (Exception e)
+        {
+            //builder.setMessage(e.getMessage());
+            //AlertDialog dialog = builder.create();
+            //dialog.show();
+        }
+        */
     }
 
     private void ScanQrcCode() {
@@ -331,7 +417,7 @@ public class MainActivity extends Activity {
         intentIntegrator.initiateScan();
     }
 
-    private class createSignature extends AsyncTask<String, Void, String[]> {
+    public class createSignature extends AsyncTask<String, Void, String[]> {
         @Override
         protected String[] doInBackground(String... params) {
             try {
@@ -435,6 +521,7 @@ public class MainActivity extends Activity {
                 SqrlResponse response = new SqrlResponse(parseResult);
                 builder.setTitle("Server response");
                 builder.setMessage(response.tifReuslt);
+
                 AlertDialog dialog = builder.create();
                 dialog.show();
             } catch (UnsupportedEncodingException e)

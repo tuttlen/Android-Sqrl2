@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/AlertDialog.AppCompat">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="domain.com"
+        android:id="@+id/tvDomain"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:textStyle="bold"
+        android:textSize="20dp" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Authenticates:"
+        android:id="@+id/textView6"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="SFN"
+        android:id="@+id/tvSFN"
+        android:layout_gravity="center_horizontal"
+        android:textStyle="bold"
+        android:textSize="50dp" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Confirm"
+        android:id="@+id/btnConfirm"
+        android:layout_gravity="left" />
+
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Reject"
+        android:id="@+id/btnReject"
+        android:layout_gravity="right"
+        android:layout_alignRight="@id/btnConfirm"
+        android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+
+</LinearLayout>
