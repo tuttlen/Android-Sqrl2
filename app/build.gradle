@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
-    //useLibrary 'org.apache.http.legacy'
+    useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.tuttlen.android_sqrl"
@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    provided 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     compile('com.google.api-client:google-api-client-android:1.20.0') {
         exclude group: 'org.apache.httpcomponents'
     }
@@ -73,4 +74,5 @@ dependencies {
     compile 'com.google.zxing:android-core:3.2.1'
     compile 'com.google.zxing:android-integration:3.2.1'
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
+    compile files('libs/org.apache.http.legacy.jar')
 }

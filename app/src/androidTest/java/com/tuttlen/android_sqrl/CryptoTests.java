@@ -19,7 +19,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 
 import eu.artemisc.stodium.Ed25519;
-import eu.artemisc.stodium.ScalarMult;
+import eu.artemisc.stodium.StodiumException;
 
 /**
  * Created by tuttlen on 1/23/2016.
@@ -356,7 +356,7 @@ public class CryptoTests extends InstrumentationTestCase {
         String test2 = Helper.bytesToHex(Helper.urlDecode(urlOneEqul1));
         String test3 = Helper.bytesToHex(Helper.urlDecode(urlOneEqul0));
 
-        assertEquals("69",test1);
+        assertEquals("69", test1);
         assertEquals("69a6", test2);
         assertEquals("69a69a", test3);
     }
@@ -372,8 +372,8 @@ public class CryptoTests extends InstrumentationTestCase {
         byte[] serverPrivate = Helper.CreatePrivateKeyFromSeed(serverPrivateSeed);
         byte[] serverPublic = Helper.PublicKeyFromPrivateKey(serverPrivate);
 
-        ScalarMult.scalarMultBase(clientPublic2, clientPrivateSeed);
-        ScalarMult.scalarMultBase(serverPublic2, serverPrivateSeed);
+        Sodium.crypto_scalarmult_base(clientPublic2, clientPrivateSeed);
+        Sodium.crypto_scalarmult_base(serverPublic2, serverPrivateSeed);
 
         assertEquals(Helper.bytesToHex(clientPublic2), Helper.bytesToHex(clientPublic));
         assertEquals(Helper.bytesToHex(serverPublic2),Helper.bytesToHex(serverPublic));
@@ -408,9 +408,10 @@ public class CryptoTests extends InstrumentationTestCase {
         byte[] clientPublic = new byte[32];
         byte[] serverPrivate = new byte[64];
         byte[] serverPublic = new byte[32];
-
-        Ed25519.keypairSeed(clientPublic, clientPrivate, clientPrivateSeed);
-        Ed25519.keypairSeed(serverPublic,serverPrivate,serverPrivateSeed);
+        try {
+            Ed25519.keypairSeed(clientPublic, clientPrivate, clientPrivateSeed);
+            Ed25519.keypairSeed(serverPublic, serverPrivate, serverPrivateSeed);
+        } catch(StodiumException e){}
         byte[] serverSS = new byte[32];
         byte[] clientSS = new byte[32];
         byte[] serverPublic_curve = new byte[32];
@@ -451,8 +452,8 @@ public class CryptoTests extends InstrumentationTestCase {
 
         //Ed25519.keypairSeed(clientPublic,clientPrivate,clientPrivateSeed);
         //Ed25519.keypairSeed(serverPublic, serverPrivate, serverPrivateSeed);
-        ScalarMult.scalarMultBase(clientPublic,clientPrivateSeed);
-        ScalarMult.scalarMultBase(serverPublic,serverPrivateSeed);
+        Sodium.crypto_scalarmult_base(clientPublic, clientPrivateSeed);
+        Sodium.crypto_scalarmult_base(serverPublic, serverPrivateSeed);
 
         byte[] serverSS = Helper.DHKA(clientPublic, serverPrivateSeed);
         byte[] clientSS = Helper.DHKA(serverPublic, clientPrivateSeed);
