@@ -132,9 +132,11 @@ public class LoginActivity extends Activity {
             // If not open newidActivity
             Intent a = new Intent(LoginActivity.this, newuserActivity.class);
             startActivity(a);
-        }
+        } else {
 
-        addUsersToSpinner(userIdentities);
+            addUsersToSpinner(userIdentities);
+
+        }
     }
 
     private identity loadIdentity(String user, String passwd) {
@@ -172,17 +174,18 @@ public class LoginActivity extends Activity {
             Intent a = new Intent(LoginActivity.this, newuserActivity.class);
             startActivity(a);
 
+        } else {
+
+            for (IdentityData item : id) {
+                users.add(item.name);
+            }
+
+
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                    android.R.layout.simple_spinner_item, users);
+            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            username.setAdapter(dataAdapter);
         }
-
-        for(IdentityData item : id) {
-            users.add(item.name);
-        }
-
-
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, users);
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        username.setAdapter(dataAdapter);
     }
 }
 
