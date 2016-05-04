@@ -25,8 +25,9 @@ import javax.crypto.spec.SecretKeySpec;
 import eu.artemisc.stodium.Ed25519;
 import eu.artemisc.stodium.GenericHash;
 import eu.artemisc.stodium.RandomBytes;
-import eu.artemisc.stodium.ScalarMult;
+//import eu.artemisc.stodium.ScalarMult;
 import eu.artemisc.stodium.Stodium;
+import eu.artemisc.stodium.StodiumException;
 
 /**
  * Created by nathan tuttle on 3/9/16.
@@ -159,19 +160,25 @@ public class Helper {
         return  randomValues;
     }
 
-    public static byte[] PublicKeyFromPrivateKey(byte[] privateKey) {
+    public static byte[] PublicKeyFromPrivateKey(byte[] privateKey)
+    {
         byte[] publicKey = new byte[32];
-        Ed25519.publicFromPrivate(publicKey, privateKey);
+        try {
+            Ed25519.publicFromPrivate(publicKey, privateKey);
+        } catch(StodiumException e)
+        {}
         return publicKey;
     }
 
-    public static byte[] Sign(byte[] message, byte[] privateKey) {
+    public static byte[] Sign(byte[] message, byte[] privateKey){
         //A bug fixed by creating a signed message that is already 64 bytes larger then message
         byte[] signatureSignedMessage = new byte[64+message.length];
         byte[] signature = new byte[Ed25519.SIGNBYTES];
 
         //yuk we have to copy out the reuslt
-        int size = Ed25519.signDetached(signature, message, privateKey);
+        try {
+            int size = Ed25519.signDetached(signature, message, privateKey);
+        } catch(StodiumException e){}
         return signature;
     }
 
@@ -179,13 +186,18 @@ public class Helper {
     {
         byte[] privateKey = new byte[64];
         byte[] publicKey = new byte[32];
-        Ed25519.keypairSeed(publicKey,privateKey,random);
+        try {
+            Ed25519.keypairSeed(publicKey, privateKey, random);
+        } catch(StodiumException e){}
         return privateKey;
     }
 
     public static boolean Verify(byte[] sMessage,byte[] message,  byte[] publicKey)
     {
-        return Ed25519.verifyDetached(sMessage,message,publicKey);
+        try {
+            return Ed25519.verifyDetached(sMessage, message, publicKey);
+        } catch (StodiumException e){}
+        return false;
     }
 
     public static byte[] SHA256(byte[] value)
@@ -289,7 +301,7 @@ public class Helper {
     {
         byte[] sharedSecret = new byte[32];
         //ScalarMult.scalarMult(sharedSecret,randomLock,publicKey);
-        ScalarMult.scalarMultBase(publicKey,randomSeed);
+        Sodium.crypto_scalarmult_base(publicKey,randomSeed);
         Sodium.crypto_scalarmult(sharedSecret,randomSeed,publicKey);
         return sharedSecret;
     }
